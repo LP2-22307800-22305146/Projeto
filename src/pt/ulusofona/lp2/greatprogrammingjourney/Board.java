@@ -7,7 +7,8 @@ public class Board {
     private int tamanho;                        // tamanho do tabuleiro
     private HashMap<Integer, Player> jogadores;       // jogadores por ID
     private int currentPlayerID;                  // ID do jogador atual
-    private int turnos;                        // contador de turnos
+    private int turnos;
+    // contador de turnos
 
     public Board() {
         this.jogadores = new HashMap<>();
@@ -42,6 +43,9 @@ public class Board {
     public void setCurrentPlayerID(int currentPlayerID) {
         this.currentPlayerID = currentPlayerID;
     }
+    public int getCurrentPlayerID() {
+        return currentPlayerID;
+    }
 
     public void setTurnos(int turnos) {
         this.turnos = turnos;
@@ -58,6 +62,5 @@ public class Board {
             System.out.println(" - " + p);
         }
     }
-
 
 }
