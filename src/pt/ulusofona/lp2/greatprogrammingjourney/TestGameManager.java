@@ -1,26 +1,29 @@
 package pt.ulusofona.lp2.greatprogrammingjourney;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestGameManager {
+
+    // === TESTES UNITÁRIOS PARA createInitialBoard() ===
 
     @Test
     public void test1_validPlayers() {
         GameManager gm = new GameManager();
         String[][] playersOK = {
-                {"1", "Sara", "Purple"},
-                {"2", "Rui", "Blue"}
+                {"1", "Sara", "Java", "Purple", "1"},
+                {"2", "Rui", "Python", "Blue", "1"}
         };
         assertTrue(gm.createInitialBoard(playersOK, 10),
-                "createInitialBoard() deveria retornar true para dados válidos");
+                "Deveria retornar true para dados válidos");
     }
 
     @Test
     public void test2_onePlayerInvalid() {
         GameManager gm = new GameManager();
         String[][] onePlayer = {
-                {"1", "Sara", "Purple"}
+                {"1", "Sara", "Java", "Purple", "1"}
         };
         assertFalse(gm.createInitialBoard(onePlayer, 10),
                 "Deveria retornar false com apenas um jogador");
@@ -30,8 +33,8 @@ public class TestGameManager {
     public void test3_wrongColor() {
         GameManager gm = new GameManager();
         String[][] wrongColor = {
-                {"1", "Sara", "Orange"},
-                {"2", "Rui", "Blue"}
+                {"1", "Sara", "Java", "Orange", "1"},
+                {"2", "Rui", "C++", "Blue", "1"}
         };
         assertFalse(gm.createInitialBoard(wrongColor, 10),
                 "Deveria retornar false com cor inválida");
@@ -41,8 +44,8 @@ public class TestGameManager {
     public void test4_duplicatedID() {
         GameManager gm = new GameManager();
         String[][] duplicatedID = {
-                {"1", "Sara", "Purple"},
-                {"1", "Rui", "Blue"}
+                {"1", "Sara", "Java", "Purple", "1"},
+                {"1", "Rui", "Python", "Blue", "1"}
         };
         assertFalse(gm.createInitialBoard(duplicatedID, 10),
                 "Deveria retornar false com IDs duplicados");
@@ -52,8 +55,8 @@ public class TestGameManager {
     public void test5_smallBoard() {
         GameManager gm = new GameManager();
         String[][] smallBoard = {
-                {"1", "Sara", "Purple"},
-                {"2", "Rui", "Blue"}
+                {"1", "Sara", "Java", "Purple", "1"},
+                {"2", "Rui", "Python", "Blue", "1"}
         };
         assertFalse(gm.createInitialBoard(smallBoard, 2),
                 "Deveria retornar false com tabuleiro pequeno");
@@ -63,23 +66,23 @@ public class TestGameManager {
     public void test6_spacesAndLower() {
         GameManager gm = new GameManager();
         String[][] spacesAndLower = {
-                {" 3 ", "  Ana  ", " blue "},
-                {" 4 ", "  Pedro  ", " GREEN "}
+                {" 3 ", "  Ana  ", " Java ", " blue ", "1"},
+                {" 4 ", "  Pedro  ", " C# ", " GREEN ", "1"}
         };
         assertTrue(gm.createInitialBoard(spacesAndLower, 6),
-                "Deveria retornar true com espaços e minúsculas");
+                "Deveria retornar true com espaços e letras minúsculas");
     }
 
     @Test
-    public void test7_playersCreatedPositions() {
+    public void test7_duplicateColor() {
         GameManager gm = new GameManager();
-        String[][] players = {
-                {"1", "Ada Lovelace", "Purple"},
-                {"2", "Alan Turing", "Green"},
-                {"3", "Grace Hopper", "Blue"}
+        String[][] duplicateColor = {
+                {"1", "Sara", "Java", "Purple", "1"},
+                {"2", "Rui", "Python", "Purple", "1"}
         };
-        gm.createInitialBoard(players, 10);
-
-
+        assertFalse(gm.createInitialBoard(duplicateColor, 10),
+                "Deveria retornar false com cores duplicadas");
     }
+
+
 }
