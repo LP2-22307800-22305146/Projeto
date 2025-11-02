@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class GameManager {
 
-    private Board board; // agora o tabuleiro é um objeto!
+    private Board board; //agora o tabuleiro é um objeto!
 
     //construtor vazio
     public GameManager() {
@@ -22,26 +22,26 @@ public class GameManager {
             return false;
         }
 
-        // Validação inicial do array
+        //Validação inicial do array
         if (playerInfo == null || playerInfo.length < 2 || playerInfo.length > 4) {
             return false;
         }
 
         board.getJogadores().clear();
 
-        // Validação do tamanho mínimo do tabuleiro
+        //Validação do tamanho mínimo do tabuleiro
         if (worldSize < playerInfo.length * 2) {
             return false;
         }
 
-        // Conjunto auxiliar para evitar cores duplicadas
+        //Conjunto auxiliar para evitar cores duplicadas
         Set<Integer> idsUsados = new HashSet<>();
         Set<String> coresUsadas = new HashSet<>();
 
         // Processar cada jogador
         for (String[] info : playerInfo) {
 
-            // Pode haver 3 ou 5 campos — aceitar ambos
+            //Pode haver 3 ou 5 campos — aceitar ambos
             if (info == null || info.length < 3) {
                 return false;
             }
@@ -49,7 +49,7 @@ public class GameManager {
 
             try {
 
-                // ======== ID ========
+                //id
                 if (info[0] == null || info[0].trim().isEmpty()) {
 
                     return false;
@@ -64,13 +64,13 @@ public class GameManager {
 
                 }
 
-                // ======== Nome ========
+                //nome
                 if (info[1] == null || info[1].trim().isEmpty()) {
                     return false;
                 }
                 String nome = info[1].trim();
 
-                // ======== Linguagens ========
+                //linguagens
                 String linguagensStr = "";
                 String cor = "";
                 int posicao = 1;
@@ -84,7 +84,7 @@ public class GameManager {
                 } else if (info.length == 4) {
                     // formato: [id, nome, linguagens, cor]
                     if (info[2] == null) {
-                        return false; // linguagens pode estar vazia, mas não null
+                        return false; //linguagens pode estar vazia, mas não null
                     }
                     linguagensStr = info[2].trim();
                     if (info[3] == null || info[3].trim().isEmpty()) {
@@ -110,7 +110,7 @@ public class GameManager {
                     }
                 }
 
-                // ======== Cor ========
+                //cor
                 // deve ser uma das quatro, exatamente igual (case-sensitive)
                 if (!cor.equals("Purple") && !cor.equals("Green") &&
                         !cor.equals("Brown") && !cor.equals("Blue")) {
@@ -122,11 +122,11 @@ public class GameManager {
                     return false;
                 }
 
-                // ======== Criar jogador ========
+                //criar jogador
                 Player novo = new Player(id, nome, cor);
                 novo.setPosicao(posicao);
 
-                // ======== Linguagens ========
+                //linguagens
                 // pode estar vazia, mas nunca null
                 if (!linguagensStr.isEmpty()) {
 
