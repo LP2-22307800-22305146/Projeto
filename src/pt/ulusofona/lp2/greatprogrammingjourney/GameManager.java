@@ -326,7 +326,7 @@ public class GameManager {
         //atualizar contador de turnos
         board.setTurnos(board.getTurnos() + 1);
 
-        if (jogadorAtual.getPosicao() == tamanho) {
+        if (novaPosicao == tamanho) {
             return true;
         }
 
