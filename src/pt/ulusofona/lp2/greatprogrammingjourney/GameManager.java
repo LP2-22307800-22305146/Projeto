@@ -297,9 +297,8 @@ public class GameManager {
 
 
 
-    public boolean moveCurrentPlayer(int nrSpaces){
+    public boolean moveCurrentPlayer(int nrSpaces) {
 
-        //nrSpaces TEM DE ESTAR ENTRE 1 A 6 (INCLUSIVE)
         if (nrSpaces < 1 || nrSpaces > 6) {
             return false;
         }
@@ -312,27 +311,25 @@ public class GameManager {
         }
 
         int tamanho = board.getTamanho();
-
-        //calcular nova posição com ricochete
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
+
+        // Ricochete
         if (novaPosicao > tamanho) {
             int excesso = novaPosicao - tamanho;
-            novaPosicao = tamanho - excesso; // "ricochete" no fim do tabuleiro
-
+            novaPosicao = tamanho - excesso;
         }
 
         jogadorAtual.setPosicao(novaPosicao);
 
-        //Se o jogador chegou à meta, conta o turno e termina
-        if (novaPosicao == tamanho) {
-            board.setTurnos(board.getTurnos() + 1);
-            return true;
-        }
-
-        //Se ainda não terminou, passa o turno normalmente
+        //Incrementar SEMPRE o turno, mesmo se for a jogada de vitória
         board.setTurnos(board.getTurnos() + 1);
 
-        //passar turno ao próximo jogador
+        // Agora verifica se chegou ao fim depois de contar
+        if (novaPosicao == tamanho) {
+            return true; // jogo termina após contar turno
+        }
+
+        // Passar turno normalmente
         ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
         idsOrdenados.sort(Integer::compareTo);
 
@@ -343,11 +340,13 @@ public class GameManager {
     }
 
 
+
     public boolean gameIsOver() {
         //se o tabuleiro não tem jogadores, o jogo não pode ter terminado
         if (board.getJogadores().isEmpty()) {
             return false;
         }
+
 
         int meta = board.getTamanho(); //ultima posição do tabuleiro
 
@@ -377,7 +376,14 @@ public class GameManager {
 
         //nr total de turnos
         resultados.add("NR. DE TURNOS");
-        resultados.add(String.valueOf(board.getTurnos()));
+
+
+        int turnos = board.getTurnos();
+        //garantimos que a jogada da vitória é contada
+        if (gameIsOver()) {
+            turnos++;
+        }
+        resultados.add(String.valueOf(turnos));
         resultados.add(""); // linha vazia
 
         //vencedor
