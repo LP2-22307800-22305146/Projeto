@@ -7,6 +7,8 @@ import java.util.HashMap;
 public class GameManager {
     private HashMap<Integer, Player> jogadores = new HashMap<>(); // ->
     private int boardSize; //guarda valor do tabuliero
+    private int currentPlayerID;
+    private int count;
 
     //construtor vazio
     public GameManager() {
@@ -14,69 +16,64 @@ public class GameManager {
     }
 
     //
-    public boolean createInitialBoard(String[][] playerInfo, int worldSize){
-        //ve se os jogadores sao entre 2 e 4
-        if (playerInfo.length < 2 || playerInfo.length > 4)
+    public boolean createInitialBoard(String[][] playerInfo, int worldSize) {
+        if (playerInfo == null || playerInfo.length < 2 || playerInfo.length > 4) {
             return false;
-        //limpa jogo anterior para evitar erros
+        }
+
         jogadores.clear();
 
-        //cores validas
         ArrayList<String> coresValidas = new ArrayList<>();
-        coresValidas.add("Purple");
-        coresValidas.add("Green");
-        coresValidas.add("Brown");
-        coresValidas.add("Blue");
+        coresValidas.add("PURPLE");
+        coresValidas.add("GREEN");
+        coresValidas.add("BROWN");
+        coresValidas.add("BLUE");
 
-        //tamanho do tabuleiro
         if (worldSize < playerInfo.length * 2) {
             return false;
         }
 
-        //percorre cada jogadoor
         for (String[] info : playerInfo) {
+            if (info.length < 3) {
+                return false;
+            }
             try {
-                //info[0] = id, info[1] = nome, info[2] = cor
-                int id = Integer.parseInt(info[0]);
+                int id = Integer.parseInt(info[0].trim());
                 String nome = info[1].trim();
-                String cor = info[2].trim();
+                String cor = info[2].trim().toUpperCase();
 
-                //ID positivo
-                if (id <= 0) {
+                if (id <= 0 || jogadores.containsKey(id) || nome.isEmpty() || !coresValidas.contains(cor)) {
                     return false;
                 }
 
-                //ID já existe
-                if (jogadores.containsKey(id)) {
-                    return false;
-                }
-
-                //nome não vazio
-                if (nome.isEmpty()) {
-                    return false;
-                }
-
-                //cor
-                if (!coresValidas.contains(cor)) {
-                    return false;
-                }
-
-                //Criar jogador e guardar no mapa
+                //Cria o jogador já na posição 1
                 Player novo = new Player(id, nome, cor);
+                novo.setPosicao(1); //garante que começa na casa 1
                 jogadores.put(id, novo);
 
             } catch (Exception e) {
-                //Se der erro (ID não é número), falha a criação
                 return false;
             }
         }
-        //guardar valor do tabuleiro para os proximos metodos
+
+        //guarda tamanho do tabuleiro
         this.boardSize = worldSize;
-        //todas as validações passarem
+
+        //define o jogador atual (menor ID)
+        currentPlayerID = Integer.MAX_VALUE;
+        for (int id : jogadores.keySet()) {
+            if (id < currentPlayerID) {
+                currentPlayerID = id;
+            }
+        }
+
+        //inicializa contador de turnos
+        count = 0;
+
         return true;
-
-
     }
+
+
 
     public String getImagePng(int nrSquare) {
         //valida intervalo

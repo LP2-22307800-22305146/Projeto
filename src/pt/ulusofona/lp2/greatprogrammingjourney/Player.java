@@ -10,16 +10,21 @@ public class Player {
         this.id = id;
         this.nome = nome;
         this.cor = cor;
-        this.posicao = 0; //começa no início do tabuleiro
+        this.posicao = 1; //começa na posição inicial
     }
 
-    //getters
+    //
     public int getId() { return id; }
     public String getNome() { return nome; }
     public String getCor() { return cor; }
     public int getPosicao() { return posicao; }
 
-    //atualiza a posição
+    //
+    public void setPosicao(int novaPosicao) {
+        this.posicao = novaPosicao;
+    }
+
+    //atualiza posição (mover n casas)
     public void mover(int casas) {
         this.posicao += casas;
     }
