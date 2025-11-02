@@ -152,6 +152,159 @@ public class TestGameManager {
 
     }
 
+    // TESTES PARA A LINGUAGENS GUARDADAS
+
+    @Test
+    public void testSemLinguagens() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Ada", "", "Green", "1"},
+                {"2", "Turing", "", "Purple", "1"}
+        };
+
+        gm.createInitialBoard(jogadores, 6);
+
+        String infoAda = gm.getProgrammerInfoAsStr(1);
+        String infoTuring = gm.getProgrammerInfoAsStr(2);
+
+        assertTrue(infoAda.contains(" |  | ") || infoAda.endsWith(" |  | Em Jogo"),
+                "Quando não há linguagens, o campo deve ficar vazio");
+        assertTrue(infoTuring.contains(" |  | ") || infoTuring.endsWith(" |  | Em Jogo"),
+                "Jogadores sem linguagens devem mostrar campo vazio");
+    }
+
+    // TESTES DA moveCurrentPlayer
+
+    @Test
+    public void testMoveCurrentPlayerValido() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Bruninho", "Python; PHP", "Blue", "1"},
+                {"2", "Boss Baby", "Java", "Green", "1"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        boolean moved = gm.moveCurrentPlayer(3);
+        assertTrue(moved, "Movimento de 3 casas deve ser permitido.");
+
+        Player p = gm.getBoard().getJogadores().get(1);
+        assertEquals(4, p.getPosicao(), "O jogador deve ir da posição 1 para a 4.");
+
+        assertEquals(2, gm.getBoard(), "O turno deve passar para o jogador 2.");
+    }
+
+    /**
+     * Movimento inválido: nrSpaces < 1.
+     */
+    @Test
+    public void testMoveCurrentPlayerInvalidoAbaixo() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Ana", "Python", "Purple", "1"},
+                {"2", "João", "C", "Green", "1"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        boolean moved = gm.moveCurrentPlayer(0);
+        assertFalse(moved, "Não deve permitir mover 0 casas.");
+
+        Player p = gm.getBoard().getJogadores().get(1);
+        assertEquals(1, p.getPosicao(), "O jogador deve permanecer na posição original.");
+    }
+
+    /**
+     * Movimento inválido: nrSpaces > 6.
+     */
+    @Test
+    public void testMoveCurrentPlayerInvalidoAcima() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Maria", "Java", "Blue", "1"},
+                {"2", "Pedro", "C#", "Brown", "1"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        boolean moved = gm.moveCurrentPlayer(7);
+        assertFalse(moved, "Não deve permitir mover mais de 6 casas.");
+
+        Player p = gm.getBoard().getJogadores().get(1);
+        assertEquals(1, p.getPosicao(), "O jogador não deve ter-se movido.");
+    }
+
+    /**
+     * REGRAS DE FRONTEIRA — Ricochete: jogador ultrapassa a meta.
+     * Exemplo: meta = 100, jogador = 99, move 3 → vai para 98.
+     */
+    @Test
+    public void testMoveCurrentPlayerRicochete() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Lia", "Go; Kotlin", "Blue", "99"},
+                {"2", "Rui", "C", "Green", "1"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 100));
+
+        boolean moved = gm.moveCurrentPlayer(3);
+        assertTrue(moved, "O movimento deve ser válido e aplicar ricochete.");
+
+        Player p = gm.getBoard().getJogadores().get(1);
+        assertEquals(98, p.getPosicao(), "Deve recuar 2 casas após ultrapassar a meta (100 → 102 → 98).");
+
+        assertEquals(2, gm.getCurrentPlayerID(), "O turno deve passar para o jogador seguinte (ID 2).");
+    }
+
+    /**
+     * Turnos circulares — quando o último jogador termina, o turno volta ao primeiro.
+     */
+    @Test
+    public void testMoveCurrentPlayerCircularTurn() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "A", "Python", "Purple", "1"},
+                {"2", "B", "C", "Green", "1"},
+                {"3", "C", "Java", "Brown", "1"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        // jogador 1 → jogador 2
+        gm.moveCurrentPlayer(1);
+        assertEquals(2, gm.getCurrentPlayerID());
+
+        // jogador 2 → jogador 3
+        gm.moveCurrentPlayer(2);
+        assertEquals(3, gm.getCurrentPlayerID());
+
+        // jogador 3 → volta ao 1
+        gm.moveCurrentPlayer(3);
+        assertEquals(1, gm.getCurrentPlayerID());
+    }
+
+    /**
+     * Verifica incremento do contador de turnos.
+     */
+    @Test
+    public void testContadorDeTurnosIncrementa() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Zé", "Python", "Blue", "1"},
+                {"2", "Mia", "Java", "Green", "1"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        int turnosAntes = gm.getBoard().getTurnos();
+        gm.moveCurrentPlayer(2);
+        int turnosDepois = gm.getBoard().getTurnos();
+
+        assertEquals(turnosAntes + 1, turnosDepois,
+                "O contador de turnos deve incrementar em 1 após cada movimento válido.");
+    }
 
 
 }

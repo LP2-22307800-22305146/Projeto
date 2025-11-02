@@ -191,7 +191,7 @@ public class GameManager {
         info[0] = String.valueOf(p.getId());               // ID
         info[1] = p.getNome();                             // Nome
         info[2] = p.linguagensComoString();                // Linguagens separadas por ";"
-        info[3] = p.getCor();                              
+        info[3] = p.getCor();
         info[4] = String.valueOf(p.getPosicao());          // Posição atual
 
         return info;
@@ -223,9 +223,41 @@ public class GameManager {
     }
 
 
-    public String[] getSlotInfo(int position){
-        return null;
+    public String[] getSlotInfo(int position) {
+        //posição fora do tabuleiro
+        if (position < 1 || position > board.getTamanho()) {
+            return null;
+        }
+
+        //lista para guardar os IDs dos jogadores nessa posição
+        String ids = "";
+
+        //percorre todos os jogadores do tabuleiro
+        ArrayList<Player> lista = new ArrayList<>(board.getJogadores().values());
+
+        for (int i = 0; i < lista.size(); i++) {
+            Player p = lista.get(i);
+
+            //se o jogador está na posição indicada
+            if (p.getPosicao() == position) {
+                // Adiciona o ID à string
+                if (ids.equals("")) {
+                    ids = String.valueOf(p.getId());
+                } else {
+                    ids = ids + "," + p.getId();
+                }
+            }
+        }
+
+        //se não há jogadores nessa posição, devolve array com string vazia
+        if (ids.equals("")) {
+            return new String[]{""};
+        }
+
+        //caso contrário, devolve array com os IDs separados por vírgula
+        return new String[]{ids};
     }
+
 
 
     public int getCurrentPlayerID() {
@@ -263,7 +295,51 @@ public class GameManager {
 
 
     public boolean moveCurrentPlayer(int nrSpaces){
-        return false;
+
+        // O nrSpaces TEM DE ESTAR ENTRE 1 A 6 (INCLUSIVE)
+        if (nrSpaces < 1 || nrSpaces > 6) {
+            return false;
+        }
+
+        int idAtual = board.getCurrentPlayerID();
+        Player jogadorAtual = board.getJogadores().get(idAtual);
+
+        if (jogadorAtual == null || jogadorAtual.isDerrotado()) {
+            return false;
+        }
+
+        int posicaoAtual = jogadorAtual.getPosicao();
+        int tamanho = board.getTamanho();
+
+        // --- Calcular nova posição com ricochete ---
+        int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
+        if (novaPosicao > tamanho) {
+
+            int excesso = novaPosicao - tamanho;
+            novaPosicao = tamanho - excesso; // "ricochete" no fim do tabuleiro
+
+        }
+
+        jogadorAtual.setPosicao(novaPosicao);
+
+        // --- 3️⃣ Atualizar contador de turnos ---
+        board.setTurnos(board.getTurnos() + 1);
+
+        // --- 4️⃣ Passar turno ao próximo jogador ---
+        ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
+        idsOrdenados.sort(Integer::compareTo);
+
+        int proximo = idsOrdenados.get(0);
+        for (int i = 0; i < idsOrdenados.size(); i++) {
+            if (idsOrdenados.get(i) == idAtual) {
+                proximo = idsOrdenados.get((i + 1) % idsOrdenados.size());
+                break;
+            }
+        }
+
+        board.setCurrentPlayerID(proximo);
+
+        return true;
     }
 
 
@@ -278,7 +354,25 @@ public class GameManager {
 
 
     public JPanel getAuthorsPanel(){
-        return null;
+        //painel
+        JPanel painel = new JPanel();
+        painel.setSize(300, 300);
+
+        //cria o label
+        JLabel autor = new JLabel("<html><center>"
+                + "Nome: Sara Isabel | Núria Fernandes<br>"
+                + "Número: a22307800 | 22305146<br>"
+                + "Disciplina: Linguagens de Programação II"
+                + "</center></html>");
+
+        //centraliza o texto
+        autor.setHorizontalAlignment(SwingConstants.CENTER);
+
+        //adiciona o label ao painel
+        painel.add(autor);
+
+        //devolve o painel para o visualizador mostrar
+        return painel;
     }
 
 
@@ -287,8 +381,7 @@ public class GameManager {
     }
 
 
-    //git
-
-    // "olá"
-    // mubdo
+    public Board getBoard() {
+        return board;
+    }
 }

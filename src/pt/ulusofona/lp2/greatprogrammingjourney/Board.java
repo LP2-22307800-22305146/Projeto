@@ -14,7 +14,7 @@ public class Board {
         this.jogadores = new HashMap<>();
         this.turnos = 0;
         this.tamanho = 0;
-        this.currentPlayerID = -1;
+        this.currentPlayerID = 0;
     }
 
     // Getters
