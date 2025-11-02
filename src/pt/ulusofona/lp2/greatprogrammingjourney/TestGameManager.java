@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestGameManager {
 
-    // === TESTES UNITÁRIOS PARA createInitialBoard() ===
+    //  TESTES UNITÁRIOS PARA createInitialBoard()
 
     // TESTES PARA O NÚMERO VÁLIDO DE JOGADORES
     @Test
@@ -175,10 +175,8 @@ public class TestGameManager {
     }
 
     // TESTES DA moveCurrentPlayer
+    // Movimento inválido: nrSpaces < 1.
 
-    /**
-     * Movimento inválido: nrSpaces < 1.
-     */
     @Test
     public void testMoveCurrentPlayerInvalidoAbaixo() {
         GameManager gm = new GameManager();
@@ -196,9 +194,9 @@ public class TestGameManager {
         assertEquals(1, p.getPosicao(), "O jogador deve permanecer na posição original.");
     }
 
-    /**
-     * Movimento inválido: nrSpaces > 6.
-     */
+
+    // Movimento inválido: nrSpaces > 6.
+
     @Test
     public void testMoveCurrentPlayerInvalidoAcima() {
         GameManager gm = new GameManager();
@@ -216,10 +214,10 @@ public class TestGameManager {
         assertEquals(1, p.getPosicao(), "O jogador não deve ter-se movido.");
     }
 
-    /**
-     * REGRAS DE FRONTEIRA — Ricochete: jogador ultrapassa a meta.
-     * Exemplo: meta = 100, jogador = 99, move 3 → vai para 98.
-     */
+
+    // REGRAS DE FRONTEIRA — Ricochete: jogador ultrapassa a meta.
+    // Exemplo: meta = 100, jogador = 99, move 3 → vai para 98.
+
     @Test
     public void testMoveCurrentPlayerRicochete() {
         GameManager gm = new GameManager();
@@ -239,9 +237,9 @@ public class TestGameManager {
         assertEquals(2, gm.getCurrentPlayerID(), "O turno deve passar para o jogador seguinte (ID 2).");
     }
 
-    /**
-     * Turnos circulares — quando o último jogador termina, o turno volta ao primeiro.
-     */
+
+    // Turnos circulares — quando o último jogador termina, o turno volta ao primeiro.
+
     @Test
     public void testMoveCurrentPlayerCircularTurn() {
         GameManager gm = new GameManager();
@@ -266,9 +264,8 @@ public class TestGameManager {
         assertEquals(1, gm.getCurrentPlayerID());
     }
 
-    /**
-     * Verifica incremento do contador de turnos.
-     */
+    // Verifica incremento do contador de turnos.
+
     @Test
     public void testContadorDeTurnosIncrementa() {
         GameManager gm = new GameManager();
@@ -317,6 +314,7 @@ public class TestGameManager {
         assertFalse(gm.gameIsOver(), "O jogo ainda não deve ter terminado.");
     }
 
+    // TESTES DA CONTAGEM DE TURNOS
     @Test
     void testContagemDeTurnosIncluiJogadaFinal() {
         GameManager gm = new GameManager();
@@ -349,5 +347,7 @@ public class TestGameManager {
         // o jogo deve ter terminado
         assertTrue(gm.gameIsOver(), "O jogo deve terminar quando o jogador chega à meta.");
     }
+
+
 
 }
