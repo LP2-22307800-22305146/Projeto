@@ -379,14 +379,12 @@ public class GameManager {
         resultados.add("");
 
         //nr total de turnos
-        resultados.add("Total de turnos:");
-        resultados.add("");
+        resultados.add("NR. DE TURNOS");
         resultados.add(String.valueOf(board.getTurnos()));
         resultados.add(""); // linha vazia
 
         //vencedor
-        resultados.add("Vencedor:");
-        resultados.add("");
+        resultados.add("VENCEDOR");
         Player vencedor = null;
         int meta = board.getTamanho();
 
@@ -405,8 +403,7 @@ public class GameManager {
         resultados.add("");
 
         //Restantes jogadores (por proximidade à meta)
-        resultados.add("Restantes Jogadores:");
-        resultados.add("");
+        resultados.add("RESTANTES");
         ArrayList<Player> restantes = new ArrayList<>(board.getJogadores().values());
         restantes.remove(vencedor);
 
@@ -414,7 +411,7 @@ public class GameManager {
         restantes.sort((p1, p2) -> Integer.compare(p2.getPosicao(), p1.getPosicao()));
 
         for (Player p : restantes) {
-            resultados.add(p.getNome() + " (" + p.getPosicao() + ")");
+            resultados.add(p.getNome() + " " + p.getPosicao());
         }
 
         return resultados;

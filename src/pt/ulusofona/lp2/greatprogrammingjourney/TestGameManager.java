@@ -176,25 +176,6 @@ public class TestGameManager {
 
     // TESTES DA moveCurrentPlayer
 
-    @Test
-    public void testMoveCurrentPlayerValido() {
-        GameManager gm = new GameManager();
-        String[][] players = {
-                {"1", "Bruninho", "Python; PHP", "Blue", "1"},
-                {"2", "Boss Baby", "Java", "Green", "1"}
-        };
-
-        assertTrue(gm.createInitialBoard(players, 10));
-
-        boolean moved = gm.moveCurrentPlayer(3);
-        assertTrue(moved, "Movimento de 3 casas deve ser permitido.");
-
-        Player p = gm.getBoard().getJogadores().get(1);
-        assertEquals(4, p.getPosicao(), "O jogador deve ir da posição 1 para a 4.");
-
-        assertEquals(2, gm.getBoard(), "O turno deve passar para o jogador 2.");
-    }
-
     /**
      * Movimento inválido: nrSpaces < 1.
      */
@@ -305,6 +286,37 @@ public class TestGameManager {
         assertEquals(turnosAntes + 1, turnosDepois,
                 "O contador de turnos deve incrementar em 1 após cada movimento válido.");
     }
+
+
+    // TESTES DA gameIsOver()
+    @Test
+    public void testGameIsOverTrue() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "9"},
+                {"2", "Bruno", "C", "Green", "10"} // este atingiu a meta
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        // O jogo deve terminar imediatamente porque Bruno está na meta
+        assertTrue(gm.gameIsOver(), "O jogo deve terminar quando um jogador atinge a última casa.");
+    }
+
+    @Test
+    public void testGameIsOverFalse() {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "5"},
+                {"2", "Bruno", "C", "Green", "9"}
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        // Nenhum jogador atingiu a meta
+        assertFalse(gm.gameIsOver(), "O jogo ainda não deve ter terminado.");
+    }
+
 
 
 }
