@@ -4,10 +4,10 @@ import java.util.HashMap;
 
 public class Board {
 
-    public int tamanho;                        // tamanho do tabuleiro
-    public HashMap<Integer, Player> jogadores;       // jogadores por ID
-    public int currentPlayerID;                  // ID do jogador atual
-    public int turnos;                        // contador de turnos
+    private int tamanho;                        // tamanho do tabuleiro
+    private HashMap<Integer, Player> jogadores;       // jogadores por ID
+    private int currentPlayerID;                  // ID do jogador atual
+    private int turnos;                        // contador de turnos
 
     public Board() {
         this.jogadores = new HashMap<>();
