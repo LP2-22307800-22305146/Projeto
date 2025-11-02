@@ -323,12 +323,14 @@ public class GameManager {
 
         jogadorAtual.setPosicao(novaPosicao);
 
-        //atualizar contador de turnos
-        board.setTurnos(board.getTurnos() + 1);
-
+        //Se o jogador chegou à meta, conta o turno e termina
         if (novaPosicao == tamanho) {
+            board.setTurnos(board.getTurnos() + 1);
             return true;
         }
+
+        //Se ainda não terminou, passa o turno normalmente
+        board.setTurnos(board.getTurnos() + 1);
 
         //passar turno ao próximo jogador
         ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
