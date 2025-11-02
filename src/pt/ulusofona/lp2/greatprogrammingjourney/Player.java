@@ -8,8 +8,8 @@ public class Player {
 
     public Player(int id, String nome, String cor) {
         this.id = id;
-        this.nome = nome;
-        this.cor = cor;
+        this.nome = nome.trim();
+        this.cor = cor.trim();
         this.posicao = 1; //começa na posição inicial
     }
 

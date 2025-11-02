@@ -23,55 +23,57 @@ public class GameManager {
 
         jogadores.clear();
 
-        ArrayList<String> coresValidas = new ArrayList<>();
-        coresValidas.add("PURPLE");
-        coresValidas.add("GREEN");
-        coresValidas.add("BROWN");
-        coresValidas.add("BLUE");
-
         if (worldSize < playerInfo.length * 2) {
             return false;
         }
 
         for (String[] info : playerInfo) {
-            if (info.length < 3) {
+            if (info == null || info.length < 3 || info[0] == null || info[1] == null || info[2] == null) {
                 return false;
             }
+
             try {
                 int id = Integer.parseInt(info[0].trim());
                 String nome = info[1].trim();
-                String cor = info[2].trim().toUpperCase();
+                String cor = info[2].trim();
 
-                if (id <= 0 || jogadores.containsKey(id) || nome.isEmpty() || !coresValidas.contains(cor)) {
+                if (id <= 0 || jogadores.containsKey(id) || nome.isEmpty()) {
                     return false;
                 }
 
-                //Cria o jogador já na posição 1
+            //aceitar cores com letras minúsculas ou espaços
+                if (!cor.equalsIgnoreCase("Purple") &&
+                        !cor.equalsIgnoreCase("Green") &&
+                        !cor.equalsIgnoreCase("Brown") &&
+                        !cor.equalsIgnoreCase("Blue")) {
+                    return false;
+                }
+
+
+                //criar jogador (posição 1 já definida no construtor)
                 Player novo = new Player(id, nome, cor);
-                novo.setPosicao(1); //garante que começa na casa 1
                 jogadores.put(id, novo);
 
             } catch (Exception e) {
                 return false;
             }
         }
-
-        //guarda tamanho do tabuleiro
+        //guardar tamanho
         this.boardSize = worldSize;
 
-        //define o jogador atual (menor ID)
+        //definir jogador atual (menor ID)
         currentPlayerID = Integer.MAX_VALUE;
         for (int id : jogadores.keySet()) {
             if (id < currentPlayerID) {
                 currentPlayerID = id;
             }
         }
-
-        //inicializa contador de turnos
+        //inicializar contador de turnos
         count = 0;
 
         return true;
     }
+
 
 
 
