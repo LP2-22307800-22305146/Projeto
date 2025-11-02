@@ -18,6 +18,9 @@ public class GameManager {
     }
 
     public boolean createInitialBoard(String[][] playerInfo, int worldSize) {
+        if (gameIsOver()) {
+            return false;
+        }
 
         // Validação inicial do array
         if (playerInfo == null || playerInfo.length < 2 || playerInfo.length > 4) {
@@ -296,7 +299,7 @@ public class GameManager {
 
     public boolean moveCurrentPlayer(int nrSpaces){
 
-        // O nrSpaces TEM DE ESTAR ENTRE 1 A 6 (INCLUSIVE)
+        //nrSpaces TEM DE ESTAR ENTRE 1 A 6 (INCLUSIVE)
         if (nrSpaces < 1 || nrSpaces > 6) {
             return false;
         }
@@ -311,7 +314,7 @@ public class GameManager {
         int posicaoAtual = jogadorAtual.getPosicao();
         int tamanho = board.getTamanho();
 
-        // --- Calcular nova posição com ricochete ---
+        //calcular nova posição com ricochete
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
         if (novaPosicao > tamanho) {
 
@@ -322,10 +325,10 @@ public class GameManager {
 
         jogadorAtual.setPosicao(novaPosicao);
 
-        // --- 3️⃣ Atualizar contador de turnos ---
+        //atualizar contador de turnos
         board.setTurnos(board.getTurnos() + 1);
 
-        // --- 4️⃣ Passar turno ao próximo jogador ---
+        //passar turno ao próximo jogador
         ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
         idsOrdenados.sort(Integer::compareTo);
 
@@ -343,14 +346,80 @@ public class GameManager {
     }
 
 
-    public boolean gameIsOver(){
+    public boolean gameIsOver() {
+        //se o tabuleiro não tem jogadores, o jogo não pode ter terminado
+        if (board.getJogadores().isEmpty()) {
+            return false;
+        }
+
+        int meta = board.getTamanho(); //ultima posição do tabuleiro
+
+        //percorre todos os jogadores e verifica se alguém chegou à meta
+        for (Player p : board.getJogadores().values()) {
+            if (p.getPosicao() == meta) {
+                return true; //o jogo termina imediatamente
+            }
+        }
+
+        //ninguém chegou ainda
         return false;
     }
 
 
-    public ArrayList<String> getGameResults(){
-        return null;
+
+    public ArrayList<String> getGameResults() {
+        ArrayList<String> resultados = new ArrayList<>();
+
+        //caso o jogo ainda não tenha terminado, retorna lista vazia
+        if (!gameIsOver() || board.getJogadores().isEmpty()) {
+            return resultados;
+        }
+
+        resultados.add("THE GREAT PROGRAMMING JOURNEY");
+        resultados.add("");
+
+        //nr total de turnos
+        resultados.add("Total de turnos:");
+        resultados.add("");
+        resultados.add(String.valueOf(board.getTurnos()));
+        resultados.add(""); // linha vazia
+
+        //vencedor
+        resultados.add("Vencedor:");
+        resultados.add("");
+        Player vencedor = null;
+        int meta = board.getTamanho();
+
+        for (Player p : board.getJogadores().values()) {
+            if (p.getPosicao() == meta) {
+                vencedor = p;
+                break;
+            }
+        }
+
+        if (vencedor == null) {
+            return resultados; //ainda não há vencedor —> lista vazia
+        }
+
+        resultados.add(vencedor.getNome());
+        resultados.add("");
+
+        //Restantes jogadores (por proximidade à meta)
+        resultados.add("Restantes Jogadores:");
+        resultados.add("");
+        ArrayList<Player> restantes = new ArrayList<>(board.getJogadores().values());
+        restantes.remove(vencedor);
+
+        //ordena por posição (maior → mais próximo da meta)
+        restantes.sort((p1, p2) -> Integer.compare(p2.getPosicao(), p1.getPosicao()));
+
+        for (Player p : restantes) {
+            resultados.add(p.getNome() + " (" + p.getPosicao() + ")");
+        }
+
+        return resultados;
     }
+
 
 
     public JPanel getAuthorsPanel(){
