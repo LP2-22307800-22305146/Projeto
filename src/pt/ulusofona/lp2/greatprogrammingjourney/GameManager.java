@@ -311,13 +311,11 @@ public class GameManager {
             return false;
         }
 
-        int posicaoAtual = jogadorAtual.getPosicao();
         int tamanho = board.getTamanho();
 
         //calcular nova posição com ricochete
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
         if (novaPosicao > tamanho) {
-
             int excesso = novaPosicao - tamanho;
             novaPosicao = tamanho - excesso; // "ricochete" no fim do tabuleiro
 
@@ -328,18 +326,15 @@ public class GameManager {
         //atualizar contador de turnos
         board.setTurnos(board.getTurnos() + 1);
 
+        if (jogadorAtual.getPosicao() == tamanho) {
+            return true;
+        }
+
         //passar turno ao próximo jogador
         ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
         idsOrdenados.sort(Integer::compareTo);
 
-        int proximo = idsOrdenados.get(0);
-        for (int i = 0; i < idsOrdenados.size(); i++) {
-            if (idsOrdenados.get(i) == idAtual) {
-                proximo = idsOrdenados.get((i + 1) % idsOrdenados.size());
-                break;
-            }
-        }
-
+        int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
         board.setCurrentPlayerID(proximo);
 
         return true;

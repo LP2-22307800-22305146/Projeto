@@ -317,6 +317,37 @@ public class TestGameManager {
         assertFalse(gm.gameIsOver(), "O jogo ainda não deve ter terminado.");
     }
 
+    @Test
+    void testContagemDeTurnosIncluiJogadaFinal() {
+        GameManager gm = new GameManager();
 
+        //criar tabuleiro pequeno para testar rapidamente
+        String[][] jogadores = {
+                {"1", "Alice", "Java;Python", "Blue"},
+                {"2", "Bob", "C;PHP", "Green"}
+        };
+        gm.createInitialBoard(jogadores, 10); // tabuleiro de 10 casas
+
+        // turno inicial deve ser 0
+        assertEquals(0, gm.getBoard().getTurnos(), "O contador deve começar em 0.");
+
+        // jogador 1 move 3 casas → turno +1
+        gm.moveCurrentPlayer(3);
+        assertEquals(1, gm.getBoard().getTurnos(), "Após 1 movimento, deve haver 1 turno.");
+
+        // jogador 2 move 2 casas → turno +1
+        gm.moveCurrentPlayer(2);
+        assertEquals(2, gm.getBoard().getTurnos(), "Após 2 movimentos, deve haver 2 turnos.");
+
+        // jogador 1 move para a meta (posição final = 10)
+        gm.getBoard().getJogadores().get(1).setPosicao(9); // manualmente antes da jogada
+        gm.moveCurrentPlayer(1); // este movimento vence o jogo
+
+        // turno deve ser incrementado mesmo na jogada final
+        assertEquals(3, gm.getBoard().getTurnos(), "A jogada vencedora também conta como turno.");
+
+        // o jogo deve ter terminado
+        assertTrue(gm.gameIsOver(), "O jogo deve terminar quando o jogador chega à meta.");
+    }
 
 }
