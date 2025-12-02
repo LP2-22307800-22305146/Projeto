@@ -7,8 +7,9 @@ public class Board {
     private int tamanho;                        // tamanho do tabuleiro
     private HashMap<Integer, Player> jogadores;       // jogadores por ID
     private int currentPlayerID;                  // ID do jogador atual
-    private int turnos;
-    // contador de turnos
+    private int turnos;     // contador de turnos
+    private HashMap<Integer, Abismo> abismos = new HashMap<>();
+    private HashMap<Integer, Ferramenta> ferramentas = new HashMap<>();
 
     public Board() {
         this.jogadores = new HashMap<>();
@@ -34,6 +35,13 @@ public class Board {
         return this;
     }
 
+    public HashMap<Integer, Abismo> getAbismos() {
+        return abismos;
+    }
+
+    public HashMap<Integer, Ferramenta> getFerramentas() {
+        return ferramentas;
+    }
 
     // Setters
     public void setTamanho(int tamanho) {
@@ -60,6 +68,14 @@ public class Board {
         System.out.println("Jogadores:");
         for (Player p : jogadores.values()) {
             System.out.println(" - " + p);
+        }
+        System.out.println("Abismos:");
+        for (Abismo a : abismos.values()) {
+            System.out.println(" - " + a);
+        }
+        System.out.println("Ferramentas:");
+        for (Ferramenta f : ferramentas.values()) {
+            System.out.println(" - " + f);
         }
     }
 

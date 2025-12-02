@@ -348,6 +348,152 @@ public class TestGameManager {
         assertTrue(gm.gameIsOver(), "O jogo deve terminar quando o jogador chega à meta.");
     }
 
+    //PARTE 2
+
+    // TESTE da getProgrammersInfo
+    @Test
+    public void testGetProgrammersInfo_FormatacaoCorreta() {
+        // Arrange (preparar o cenário)
+        GameManager gm = new GameManager();
+
+        // Cria tabuleiro com dois jogadores
+        String[][] jogadores = {
+                {"1", "Bruninho", "Java", "Blue"},
+                {"2", "Raquelita", "Python", "Green"}
+        };
+        gm.createInitialBoard(jogadores, 10);
+
+        // Adiciona ferramentas simuladas (apenas se o Player tiver método addFerramenta)
+        Player p1 = gm.getBoard().getJogadores().get(1);
+        Player p2 = gm.getBoard().getJogadores().get(2);
+
+        // Vamos supor que Ferramenta tem construtor Ferramenta(String nome)
+        p1.getFerramentas().add(new Ferramenta(4,"IDE"));
+        p1.getFerramentas().add(new Ferramenta(0,"Herança"));
+
+        // Nenhuma ferramenta para p2 → deve aparecer "No tools"
+
+        // Act (executar)
+        String resultado = gm.getProgrammersInfo();
+
+        // Assert (verificar)
+        String esperado = "Bruninho : IDE;Herança | Raquelita : No tools";
+
+        assertEquals(esperado, resultado,
+                "A string retornada deve conter os nomes e ferramentas formatados corretamente.");
+    }
+
+    // TESTE da createInitialBoard
+    // ---------- TESTES DE ABISMOS E FERRAMENTAS ----------
+
+    @Test
+    public void testAbismoValido() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "1"},
+                {"2", "Bruno", "Python", "Green", "1"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"0", "Abyss", "3"} // Erro de Sintaxe na posição 3
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10, abyssesAndTools),
+                "Deve retornar true com abismo válido");
+        assertEquals(1, gm.getBoard().getAbismos().size(),
+                "Deve existir 1 abismo no tabuleiro");
+    }
+
+    @Test
+    public void testFerramentaValida() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "1"},
+                {"2", "Bruno", "Python", "Green", "1"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"4", "Tool", "5"} // Ferramenta IDE na posição 5
+        };
+
+        assertTrue(gm.createInitialBoard(players, 10, abyssesAndTools),
+                "Deve retornar true com ferramenta válida");
+        assertEquals(1, gm.getBoard().getFerramentas().size(),
+                "Deve existir 1 ferramenta no tabuleiro");
+    }
+
+    @Test
+    public void testAbismoInvalido() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "1"},
+                {"2", "Bruno", "Python", "Green", "1"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"15", "Abyss", "3"} // ID inválido (maior que 9)
+        };
+
+        assertFalse(gm.createInitialBoard(players, 10, abyssesAndTools),
+                "Deve retornar false se o ID do abismo for inválido");
+    }
+
+    @Test
+    public void testFerramentaInvalida() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "1"},
+                {"2", "Bruno", "Python", "Green", "1"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"9", "Tool", "8"} // ID inválido (>5)
+        };
+
+        assertFalse(gm.createInitialBoard(players, 10, abyssesAndTools),
+                "Deve retornar false se o ID da ferramenta for inválido");
+    }
+
+    @Test
+    public void testPosicaoInvalidaDeAbismoOuFerramenta() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "1"},
+                {"2", "Bruno", "Python", "Green", "1"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"1", "Abyss", "0"}, // posição inválida
+                {"3", "Tool", "15"}  // posição fora do limite
+        };
+
+        assertFalse(gm.createInitialBoard(players, 10, abyssesAndTools),
+                "Deve retornar false para posições inválidas");
+    }
+
+    @Test
+    public void testTipoInvalido() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue", "1"},
+                {"2", "Bruno", "Python", "Green", "1"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"2", "Banana", "4"} // tipo inválido
+        };
+
+        assertFalse(gm.createInitialBoard(players, 10, abyssesAndTools),
+                "Deve retornar false se o tipo não for Abyss ou Tool");
+    }
+
+
 
 
 }

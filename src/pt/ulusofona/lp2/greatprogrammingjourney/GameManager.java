@@ -170,12 +170,15 @@ public class GameManager {
 
     public boolean createInitialBoard(String[][] playerInfo, int worldSize, String[][] abyssesAndTools) {
 
-        //Verificação que o número de jogadores está entre 2 e 4
+        if (gameIsOver()) {
+            return false;
+        }
+
+        //Validação inicial do array
         if (playerInfo == null || playerInfo.length < 2 || playerInfo.length > 4) {
             return false;
         }
 
-        // Limpar tabuleiro antes de recriar
         board.getJogadores().clear();
 
         //Validação do tamanho mínimo do tabuleiro
@@ -187,60 +190,109 @@ public class GameManager {
         Set<Integer> idsUsados = new HashSet<>();
         Set<String> coresUsadas = new HashSet<>();
 
-        // Validar e criar cada jogador
+        // Processar cada jogador
         for (String[] info : playerInfo) {
 
-            // Cada jogador deve ter pelo menos 3 campos
+            //Pode haver 3 ou 5 campos — aceitar ambos
             if (info == null || info.length < 3) {
                 return false;
             }
 
+
             try {
 
-                // === ID ===
+                //id
                 if (info[0] == null || info[0].trim().isEmpty()) {
+
                     return false;
+
                 }
 
                 int id = Integer.parseInt(info[0].trim());
-                if (id < 1 || !idsUsados.add(id)) { // deve ser >= 1 e único
+
+                if (id <= 0 || !idsUsados.add(id)) {
+
                     return false;
+
                 }
 
-                // === Nome ===
+                //nome
                 if (info[1] == null || info[1].trim().isEmpty()) {
                     return false;
                 }
                 String nome = info[1].trim();
 
-                // === Cor ===
-                String cor = info[info.length - 1].trim();
-                if (!cor.equals("Purple") && !cor.equals("Green")
-                        && !cor.equals("Brown") && !cor.equals("Blue")) {
-                    return false;
-                }
-                if (!coresUsadas.add(cor)) { // cor única
-                    return false;
-                }
-
-                // === Linguagens (opcional) ===
+                //linguagens
                 String linguagensStr = "";
-                if (info.length >= 4) {
-                    linguagensStr = info[2] != null ? info[2].trim() : "";
-                }
+                String cor = "";
+                int posicao = 1;
 
-                // Criar jogador
-                Player novo = new Player(id, nome, cor);
-                if (!linguagensStr.isEmpty()) {
-                    String[] linguas = linguagensStr.split("\\s*;\\s*");
-                    for (String l : linguas) {
-                        if (l != null && !l.trim().isEmpty()) {
-                            novo.adicionarLinguagem(l.trim());
-                        }
+                if (info.length == 3) {
+                    // formato: [id, nome, cor]
+                    if (info[2] == null || info[2].trim().isEmpty()) {
+                        return false;
+                    }
+                    cor = info[2].trim();
+                } else if (info.length == 4) {
+                    // formato: [id, nome, linguagens, cor]
+                    if (info[2] == null) {
+                        return false; //linguagens pode estar vazia, mas não null
+                    }
+                    linguagensStr = info[2].trim();
+                    if (info[3] == null || info[3].trim().isEmpty()) {
+                        return false;
+                    }
+                    cor = info[3].trim();
+                } else if (info.length >= 5) {
+                    // formato: [id, nome, linguagens, cor, posicao]
+
+                    if (info[2] == null) {
+                        return false;
+                    }
+                    linguagensStr = info[2].trim();
+
+                    if (info[3] == null || info[3].trim().isEmpty()) {
+                        return false;
+                    }
+
+                    cor = info[3].trim();
+
+                    if (info[4] != null && !info[4].trim().isEmpty()) {
+                        posicao = Integer.parseInt(info[4].trim());
                     }
                 }
 
-                // Adicionar jogador ao tabuleiro
+                //cor
+                // deve ser uma das quatro, exatamente igual (case-sensitive)
+                if (!cor.equals("Purple") && !cor.equals("Green") &&
+                        !cor.equals("Brown") && !cor.equals("Blue")) {
+                    return false;
+                }
+
+                // não pode repetir cor
+                if (!coresUsadas.add(cor)) {
+                    return false;
+                }
+
+                //criar jogador
+                Player novo = new Player(id, nome, cor);
+                novo.setPosicao(posicao);
+
+                //linguagens
+                // pode estar vazia, mas nunca null
+                if (!linguagensStr.isEmpty()) {
+
+                    String[] linguas = linguagensStr.split("\\s*;\\s*");
+                    for (String l : linguas) {
+
+                        if (l != null && !l.trim().isEmpty()) {
+                            novo.adicionarLinguagem(l.trim());
+                        }
+
+                    }
+                }
+
+                // adicionar ao tabuleiro
                 board.getJogadores().put(id, novo);
 
             } catch (Exception e) {
@@ -248,37 +300,72 @@ public class GameManager {
             }
         }
 
-        // Validar abismos e ferramentas (se existirem)
-        if (abyssesAndTools != null && abyssesAndTools.length > 0) {
-            for (String[] item : abyssesAndTools) {
-                if (item == null || item.length < 3) {
-                    return false;
-                }
+        // ===============================
+// Processar Abismos e Ferramentas
+// ===============================
+        if (abyssesAndTools != null) {
+
+            // Limpa listas anteriores, se existirem
+            board.getAbismos().clear();
+            board.getFerramentas().clear();
+
+            for (String[] linha : abyssesAndTools) {
 
                 try {
-                    int tipo = Integer.parseInt(item[0]); // tipo do elemento
-                    String nome = item[1];
-                    int posicao = Integer.parseInt(item[2]);
-
-                    // Nome não pode ser vazio e posição tem de ser válida
-                    if (nome == null || nome.trim().isEmpty()) {
+                    // Cada linha deve ter exatamente 3 elementos: [id, tipo, posição]
+                    if (linha == null || linha.length != 3) {
                         return false;
                     }
+
+                    int id = Integer.parseInt(linha[0].trim());
+                    String tipo = linha[1].trim();
+                    int posicao = Integer.parseInt(linha[2].trim());
+
+                    // posição válida?
                     if (posicao < 1 || posicao > worldSize) {
                         return false;
                     }
 
+                    // Abyss ou Tool?
+                    if (tipo.equalsIgnoreCase("Abyss")) {
+                        // id válido: 0 a 9
+                        if (id < 0 || id > 9) {
+                            return false;
+                        }
+                        board.getAbismos().put(posicao, new Abismo(id, posicao));
+                    } else if (tipo.equalsIgnoreCase("Tool")) {
+                        // id válido: 0 a 5
+                        if (id < 0 || id > 5) {
+                            return false;
+                        }
+                        String nomeFerramenta = "";
+                        switch (id) {
+                            case 0: nomeFerramenta = "Herança"; break;
+                            case 1: nomeFerramenta = "Programação Funcional"; break;
+                            case 2: nomeFerramenta = "Testes Unitários"; break;
+                            case 3: nomeFerramenta = "Tratamento de Excepções"; break;
+                            case 4: nomeFerramenta = "IDE"; break;
+                            case 5: nomeFerramenta = "Ajuda Do Professor"; break;
+                            default: nomeFerramenta = "Ferramenta Desconhecida";
+                        }
+
+                        board.getFerramentas().put(posicao, new Ferramenta(id, nomeFerramenta));
+                    } else {
+                        // tipo inválido
+                        return false;
+                    }
+
                 } catch (Exception e) {
-                    return false; // qualquer erro → falha na criação
+                    return false;
                 }
             }
         }
 
-        // Guardar tamanho e inicializar jogo
-        board.setTamanho(worldSize);
-        board.setTurnos(0);
 
-        // Define o jogador inicial (menor ID)
+        //guardar tamanho
+        board.setTamanho(worldSize);
+
+        // Definir jogador inicial (menor ID)
         int menorID = Integer.MAX_VALUE;
         for (int id : board.getJogadores().keySet()) {
             if (id < menorID) {
@@ -287,9 +374,13 @@ public class GameManager {
         }
         board.setCurrentPlayerID(menorID);
 
-        // Tudo OK
+        // Reiniciar contador de turnos
+        board.setTurnos(0);
+
         return true;
+
     }
+
     public String getImagePng(int nrSquare) {
         //valida intervalo
         if (nrSquare < 1 || nrSquare > board.getTamanho()) {
@@ -347,12 +438,13 @@ public class GameManager {
     }
 
     public String getProgrammersInfo() {
+
         // Se não houver jogadores, retorna string vazia
         if (board.getJogadores().isEmpty()) {
             return "";
         }
 
-        StringBuilder sb = new StringBuilder();
+        String resultado = "";
 
         // Percorrer todos os jogadores
         for (Player p : board.getJogadores().values()) {
@@ -362,29 +454,36 @@ public class GameManager {
                 continue;
             }
 
-            // Nome do jogador
-            sb.append(p.getNome()).append(" : ");
+            // Começar o segmento com o nome do jogador
+            resultado += p.getNome() + " : ";
 
-            // Ferramentas — vamos assumir que são armazenadas em linguagensFavoritas (por agora)
-            ArrayList<String> ferramentas = p.getLinguagensFavoritas();
+            // Obter as ferramentas (por agora usamos linguagensFavoritas)
+            ArrayList<Ferramenta> ferramentas = p.getFerramentas();
 
             if (ferramentas.isEmpty()) {
-                sb.append("No tools");
+                resultado += "No tools";
             } else {
-                sb.append(String.join(";", ferramentas));
+                // Converte cada ferramenta em texto (usando o toString() ou um método getNome())
+                ArrayList<String> nomesFerramentas = new ArrayList<>();
+
+                for (Ferramenta f : ferramentas) {
+                    nomesFerramentas.add(f.toString());  // ou f.getNome(), se tiver esse método
+                }
+
+                resultado += String.join(";", nomesFerramentas);
             }
 
-            sb.append(" | "); // separador entre jogadores
+            // Adiciona separador entre jogadores
+            resultado += " | ";
         }
 
-        // Remover separador final, se existir
-        if (sb.length() > 3) {
-            sb.setLength(sb.length() - 3); // remove " | " do final
+        // Remover o último " | " se existir
+        if (resultado.endsWith(" | ")) {
+            resultado = resultado.substring(0, resultado.length() - 3);
         }
 
-        return sb.toString();
+        return resultado;
     }
-
 
     public String[] getSlotInfo(int position) {
         //posição fora do tabuleiro
