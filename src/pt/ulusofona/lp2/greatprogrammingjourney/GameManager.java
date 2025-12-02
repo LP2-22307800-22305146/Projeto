@@ -170,139 +170,13 @@ public class GameManager {
 
     public boolean createInitialBoard(String[][] playerInfo, int worldSize, String[][] abyssesAndTools) {
 
-        if (gameIsOver()) {
+        if (!createInitialBoard(playerInfo,worldSize)) {
             return false;
-        }
-
-        //Validação inicial do array
-        if (playerInfo == null || playerInfo.length < 2 || playerInfo.length > 4) {
-            return false;
-        }
-
-        board.getJogadores().clear();
-
-        //Validação do tamanho mínimo do tabuleiro
-        if (worldSize < playerInfo.length * 2) {
-            return false;
-        }
-
-        //Conjunto auxiliar para evitar cores duplicadas
-        Set<Integer> idsUsados = new HashSet<>();
-        Set<String> coresUsadas = new HashSet<>();
-
-        // Processar cada jogador
-        for (String[] info : playerInfo) {
-
-            //Pode haver 3 ou 5 campos — aceitar ambos
-            if (info == null || info.length < 3) {
-                return false;
-            }
-
-
-            try {
-
-                //id
-                if (info[0] == null || info[0].trim().isEmpty()) {
-
-                    return false;
-
-                }
-
-                int id = Integer.parseInt(info[0].trim());
-
-                if (id <= 0 || !idsUsados.add(id)) {
-
-                    return false;
-
-                }
-
-                //nome
-                if (info[1] == null || info[1].trim().isEmpty()) {
-                    return false;
-                }
-                String nome = info[1].trim();
-
-                //linguagens
-                String linguagensStr = "";
-                String cor = "";
-                int posicao = 1;
-
-                if (info.length == 3) {
-                    // formato: [id, nome, cor]
-                    if (info[2] == null || info[2].trim().isEmpty()) {
-                        return false;
-                    }
-                    cor = info[2].trim();
-                } else if (info.length == 4) {
-                    // formato: [id, nome, linguagens, cor]
-                    if (info[2] == null) {
-                        return false; //linguagens pode estar vazia, mas não null
-                    }
-                    linguagensStr = info[2].trim();
-                    if (info[3] == null || info[3].trim().isEmpty()) {
-                        return false;
-                    }
-                    cor = info[3].trim();
-                } else if (info.length >= 5) {
-                    // formato: [id, nome, linguagens, cor, posicao]
-
-                    if (info[2] == null) {
-                        return false;
-                    }
-                    linguagensStr = info[2].trim();
-
-                    if (info[3] == null || info[3].trim().isEmpty()) {
-                        return false;
-                    }
-
-                    cor = info[3].trim();
-
-                    if (info[4] != null && !info[4].trim().isEmpty()) {
-                        posicao = Integer.parseInt(info[4].trim());
-                    }
-                }
-
-                //cor
-                // deve ser uma das quatro, exatamente igual (case-sensitive)
-                if (!cor.equals("Purple") && !cor.equals("Green") &&
-                        !cor.equals("Brown") && !cor.equals("Blue")) {
-                    return false;
-                }
-
-                // não pode repetir cor
-                if (!coresUsadas.add(cor)) {
-                    return false;
-                }
-
-                //criar jogador
-                Player novo = new Player(id, nome, cor);
-                novo.setPosicao(posicao);
-
-                //linguagens
-                // pode estar vazia, mas nunca null
-                if (!linguagensStr.isEmpty()) {
-
-                    String[] linguas = linguagensStr.split("\\s*;\\s*");
-                    for (String l : linguas) {
-
-                        if (l != null && !l.trim().isEmpty()) {
-                            novo.adicionarLinguagem(l.trim());
-                        }
-
-                    }
-                }
-
-                // adicionar ao tabuleiro
-                board.getJogadores().put(id, novo);
-
-            } catch (Exception e) {
-                return false;
-            }
         }
 
         // ===============================
-// Processar Abismos e Ferramentas
-// ===============================
+        // Processar Abismos e Ferramentas
+        // ===============================
         if (abyssesAndTools != null) {
 
             // Limpa listas anteriores, se existirem
@@ -422,6 +296,16 @@ public class GameManager {
 
         Player p = board.getJogadores().get(id);
 
+        // ferramentas (se não existir lista em Player, assume "No tools")
+        String ferramentasStr = "No tools";
+        if (p.getFerramentas() != null && !p.getFerramentas().isEmpty()) {
+            ArrayList<String> nomes = new ArrayList<>();
+            for (Ferramenta f : p.getFerramentas()) {
+                nomes.add(f.getNome());
+            }
+            ferramentasStr = String.join(";", nomes);
+        }
+
         // criar cópia das linguagens e ordenar alfabeticamente
         ArrayList<String> linguagensOrdenadas = new ArrayList<>(p.getLinguagensFavoritas());
         linguagensOrdenadas.sort(String::compareToIgnoreCase);
@@ -434,7 +318,8 @@ public class GameManager {
 
         // construir string final
         return p.getId() + " | " + p.getNome() + " | " +
-                p.getPosicao() + " | " + linguagensStr + " | " + estado;
+                p.getPosicao() + " | " + ferramentasStr + " | " +
+                linguagensStr + " | " + estado;
     }
 
     public String getProgrammersInfo() {
