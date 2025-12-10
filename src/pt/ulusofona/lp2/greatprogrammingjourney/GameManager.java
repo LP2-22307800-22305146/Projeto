@@ -192,22 +192,24 @@ public class GameManager {
                     }
 
                     int id = Integer.parseInt(linha[0].trim());
-                    String tipo = linha[1].trim();
+                    int tipo = Integer.parseInt(linha[1].trim());
                     int posicao = Integer.parseInt(linha[2].trim());
 
+                    //VERIFICAR POSIÇÃO
                     // posição válida?
                     if (posicao < 1 || posicao > worldSize) {
                         return false;
                     }
 
-                    // Abyss ou Tool?
-                    if (tipo.equalsIgnoreCase("Abyss")) {
+
+                    // VERIFICAR O ID
+                    if (tipo == 0) {
                         // id válido: 0 a 9
                         if (id < 0 || id > 9) {
                             return false;
                         }
                         board.getAbismos().put(posicao, new Abismo(id, posicao));
-                    } else if (tipo.equalsIgnoreCase("Tool")) {
+                    } else if (tipo == 1) {
                         // id válido: 0 a 5
                         if (id < 0 || id > 5) {
                             return false;
@@ -481,7 +483,7 @@ public class GameManager {
 
     public String reactToAbyssOrTool() {
 
-        return "";
+        return null;
 
     }
 
