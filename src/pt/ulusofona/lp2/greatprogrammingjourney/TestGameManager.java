@@ -493,6 +493,87 @@ public class TestGameManager {
                 "Deve retornar false se o tipo não for Abyss ou Tool");
     }
 
+    @Test
+    public void testCreateInitialBoard_ComAbismoValido() {
+        GameManager gm = new GameManager();
+
+        // Jogadores
+        String[][] players = {
+                {"1", "Bruninho", "Common Lisp; PHP", "Blue"}
+        };
+
+        // Tabuleiro de 10 casas
+        int worldSize = 10;
+
+        // Abismo válido (id=0 → Erro de Sintaxe, tipo=Abyss, posição=3)
+        String[][] abyssesAndTools = {
+                {"0", "Abyss", "3"}
+        };
+
+        boolean result = gm.createInitialBoard(players, worldSize, abyssesAndTools);
+
+        System.out.println("createInitialBoard() com abismo válido → " + result);
+        assertTrue(result, "Deve retornar true com abismo válido");
+
+        // Verificar se o abismo foi adicionado corretamente
+        String[] slot = gm.getSlotInfo(3);
+        System.out.println("Slot 3 → " + String.join(" | ", slot));
+
+        assertEquals(3, slot.length, "getSlotInfo() deve retornar 3 elementos");
+        assertEquals("Abyss", slot[0]);
+        assertEquals("0", slot[1]);
+        assertEquals("Erro de Sintaxe", slot[2]);
+    }
+
+    @Test
+    public void testCreateInitialBoard_ComFerramentaValida() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Raquelita", "C", "Green"}
+        };
+
+        int worldSize = 10;
+
+        // Ferramenta válida (id=4 → IDE, tipo=Tool, posição=5)
+        String[][] abyssesAndTools = {
+                {"4", "Tool", "5"}
+        };
+
+        boolean result = gm.createInitialBoard(players, worldSize, abyssesAndTools);
+
+        System.out.println("createInitialBoard() com ferramenta válida → " + result);
+        assertTrue(result, "Deve retornar true com ferramenta válida");
+
+        // Verificar se a ferramenta foi adicionada corretamente
+        String[] slot = gm.getSlotInfo(5);
+        System.out.println("Slot 5 → " + String.join(" | ", slot));
+
+        assertEquals(3, slot.length, "getSlotInfo() deve retornar 3 elementos");
+        assertEquals("Tool", slot[0]);
+        assertEquals("4", slot[1]);
+        assertEquals("IDE", slot[2]);
+    }
+
+    @Test
+    public void testCreateInitialBoard_ComDadosInvalidos() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Neo", "Python", "Purple"}
+        };
+
+        int worldSize = 10;
+
+        // Abismo inválido (id fora do intervalo)
+        String[][] abyssesAndTools = {
+                {"15", "Abyss", "3"}
+        };
+
+        boolean result = gm.createInitialBoard(players, worldSize, abyssesAndTools);
+        System.out.println("createInitialBoard() com abismo inválido → " + result);
+        assertFalse(result, "Deve retornar false com id de abismo inválido");
+    }
 
 
 

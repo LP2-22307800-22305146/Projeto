@@ -3,10 +3,7 @@ package pt.ulusofona.lp2.greatprogrammingjourney;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class GameManager {
 
@@ -184,35 +181,28 @@ public class GameManager {
             board.getFerramentas().clear();
 
             for (String[] linha : abyssesAndTools) {
-
                 try {
-                    // Cada linha deve ter exatamente 3 elementos: [id, tipo, posição]
                     if (linha == null || linha.length != 3) {
                         return false;
                     }
 
-                    int id = Integer.parseInt(linha[0].trim());
-                    String tipo = linha[1].trim(); // ← tipo agora é String
+                    int tipo = Integer.parseInt(linha[0].trim()); // 0 = Abyss, 1 = Tool
+                    int id = Integer.parseInt(linha[1].trim());
                     int posicao = Integer.parseInt(linha[2].trim());
 
-// verificar posição
+// posição válida?
                     if (posicao < 1 || posicao > worldSize) {
                         return false;
                     }
 
-// verificar tipo e id
-                    if (tipo.equalsIgnoreCase("Abyss") || tipo.equals("0")) {
-                        // id válido: 0 a 9
-                        if (id < 0 || id > 9) {
-                            return false;
-                        }
+// tipo 0 = Abismo
+                    if (tipo == 0) {
+                        if (id < 0 || id > 9) return false;
                         board.getAbismos().put(posicao, new Abismo(id, posicao));
-                    }
-                    else if (tipo.equalsIgnoreCase("Tool") || tipo.equals("1")) {
-                        // id válido: 0 a 5
-                        if (id < 0 || id > 5) {
-                            return false;
-                        }
+
+// tipo 1 = Ferramenta
+                    } else if (tipo == 1) {
+                        if (id < 0 || id > 5) return false;
 
                         String nomeFerramenta = switch (id) {
                             case 0 -> "Herança";
@@ -225,17 +215,19 @@ public class GameManager {
                         };
 
                         board.getFerramentas().put(posicao, new Ferramenta(id, nomeFerramenta));
-                    }
-                    else {
-                        // tipo inválido
+
+// tipo inválido
+                    } else {
                         return false;
                     }
 
 
                 } catch (Exception e) {
+                    e.printStackTrace();
                     return false;
                 }
             }
+
         }
 
 
@@ -525,9 +517,6 @@ public class GameManager {
 
         int turnos = board.getTurnos();
         //garantimos que a jogada da vitória é contada
-        if (gameIsOver()) {
-            turnos++;
-        }
         resultados.add(String.valueOf(turnos));
         resultados.add(""); // linha vazia
 
