@@ -191,8 +191,8 @@ public class GameManager {
                         return false;
                     }
 
-                    String tipo = linha[1].trim(); // ← tipo agora é String
                     int id = Integer.parseInt(linha[0].trim());
+                    String tipo = linha[1].trim(); // ← tipo agora é String
                     int posicao = Integer.parseInt(linha[2].trim());
 
 // verificar posição
@@ -374,38 +374,35 @@ public class GameManager {
     }
 
     public String[] getSlotInfo(int position) {
-        //posição fora do tabuleiro
-        if (position < 1 || position > board.getTamanho()) {
-            return null;
+        //se existir um abismo nesta posição
+        if (board.getAbismos().containsKey(position)) {
+            Abismo a = board.getAbismos().get(position);
+
+            String nome = switch (a.getId()) {
+                case 0 -> "Erro de Sintaxe";
+                case 1 -> "Erro de Lógica";
+                case 2 -> "Exception";
+                case 3 -> "FileNotFoundException";
+                case 4 -> "Crash";
+                case 5 -> "Código Duplicado";
+                case 6 -> "Efeitos Secundários";
+                case 7 -> "Blue Screen of Death";
+                case 8 -> "Ciclo Infinito";
+                case 9 -> "Segmentation Fault";
+                default -> "Desconhecido";
+            };
+
+            return new String[]{"Abyss", String.valueOf(a.getId()), nome};
         }
 
-        //lista para guardar os IDs dos jogadores nessa posição
-        String ids = "";
-
-        //percorre todos os jogadores do tabuleiro
-        ArrayList<Player> lista = new ArrayList<>(board.getJogadores().values());
-
-        for (int i = 0; i < lista.size(); i++) {
-            Player p = lista.get(i);
-
-            //se o jogador está na posição indicada
-            if (p.getPosicao() == position) {
-                // Adiciona o ID à string
-                if (ids.equals("")) {
-                    ids = String.valueOf(p.getId());
-                } else {
-                    ids = ids + "," + p.getId();
-                }
-            }
+        //se existir uma ferramenta nesta posição
+        if (board.getFerramentas().containsKey(position)) {
+            Ferramenta f = board.getFerramentas().get(position);
+            return new String[]{"Tool", String.valueOf(f.getId()), f.getNome()};
         }
 
-        //se não há jogadores nessa posição, devolve array com string vazia
-        if (ids.equals("")) {
-            return new String[]{""};
-        }
-
-        //caso contrário, devolve array com os IDs separados por vírgula
-        return new String[]{ids};
+        //se não existir nada, devolve vazio (como pedido)
+        return new String[]{};
     }
 
     public int getCurrentPlayerID() {
@@ -604,4 +601,6 @@ public class GameManager {
     public Board getBoard() {
         return board;
     }
+
+
 }

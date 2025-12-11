@@ -493,7 +493,7 @@ public class TestGameManager {
                 "Deve retornar false se o tipo não for Abyss ou Tool");
     }
 
-   
+
     @Test
     public void testCreateInitialBoard_ComDadosInvalidos() {
         GameManager gm = new GameManager();
@@ -512,6 +512,79 @@ public class TestGameManager {
         boolean result = gm.createInitialBoard(players, worldSize, abyssesAndTools);
         System.out.println("createInitialBoard() com abismo inválido → " + result);
         assertFalse(result, "Deve retornar false com id de abismo inválido");
+    }
+
+    @Test
+    public void testGetSlotInfo_ComAbismo() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        // Abismo válido: Erro de Sintaxe (id=0), tipo=Abyss, posição=3
+        String[][] abyssesAndTools = {
+                {"0", "Abyss", "3"}
+        };
+
+        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        assertTrue(result, "createInitialBoard deve retornar true com abismo válido");
+
+        String[] slot = gm.getSlotInfo(3);
+        assertNotNull(slot, "getSlotInfo não deve retornar null");
+        assertEquals(3, slot.length, "getSlotInfo deve retornar um array com 3 elementos");
+
+        assertEquals("Abyss", slot[0], "O tipo deve ser 'Abyss'");
+        assertEquals("0", slot[1], "O ID deve ser 0");
+        assertEquals("Erro de Sintaxe", slot[2], "O nome do abismo deve ser 'Erro de Sintaxe'");
+    }
+
+    @Test
+    public void testGetSlotInfo_ComFerramenta() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        // Ferramenta válida: IDE (id=4), tipo=Tool, posição=5
+        String[][] abyssesAndTools = {
+                {"4", "Tool", "5"}
+        };
+
+        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        assertTrue(result, "createInitialBoard deve retornar true com ferramenta válida");
+
+        String[] slot = gm.getSlotInfo(5);
+        assertNotNull(slot, "getSlotInfo não deve retornar null");
+        assertEquals(3, slot.length, "getSlotInfo deve retornar um array com 3 elementos");
+
+        assertEquals("Tool", slot[0], "O tipo deve ser 'Tool'");
+        assertEquals("4", slot[1], "O ID deve ser 4");
+        assertEquals("IDE", slot[2], "O nome da ferramenta deve ser 'IDE'");
+    }
+
+    @Test
+    public void testGetSlotInfo_SemNada() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        String[][] abyssesAndTools = {}; // Nenhum abismo ou ferramenta
+
+        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
+        assertTrue(result, "createInitialBoard deve retornar true mesmo sem abismos ou ferramentas");
+
+        String[] slot = gm.getSlotInfo(7);
+        assertNotNull(slot, "getSlotInfo não deve retornar null mesmo em posição vazia");
+        assertEquals(0, slot.length, "getSlotInfo deve retornar array vazio quando não há nada");
     }
 
 
