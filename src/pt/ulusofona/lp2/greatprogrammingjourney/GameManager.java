@@ -192,44 +192,45 @@ public class GameManager {
                     }
 
                     int id = Integer.parseInt(linha[0].trim());
-                    int tipo = Integer.parseInt(linha[1].trim());
+                    String tipo = linha[1].trim(); // ← tipo agora é String
                     int posicao = Integer.parseInt(linha[2].trim());
 
-                    //VERIFICAR POSIÇÃO
-                    // posição válida?
+// verificar posição
                     if (posicao < 1 || posicao > worldSize) {
                         return false;
                     }
 
-
-                    // VERIFICAR O ID
-                    if (tipo == 0) {
+// verificar tipo e id
+                    if (tipo.equalsIgnoreCase("Abyss") || tipo.equals("0")) {
                         // id válido: 0 a 9
                         if (id < 0 || id > 9) {
                             return false;
                         }
                         board.getAbismos().put(posicao, new Abismo(id, posicao));
-                    } else if (tipo == 1) {
+                    }
+                    else if (tipo.equalsIgnoreCase("Tool") || tipo.equals("1")) {
                         // id válido: 0 a 5
                         if (id < 0 || id > 5) {
                             return false;
                         }
-                        String nomeFerramenta = "";
-                        switch (id) {
-                            case 0: nomeFerramenta = "Herança"; break;
-                            case 1: nomeFerramenta = "Programação Funcional"; break;
-                            case 2: nomeFerramenta = "Testes Unitários"; break;
-                            case 3: nomeFerramenta = "Tratamento de Excepções"; break;
-                            case 4: nomeFerramenta = "IDE"; break;
-                            case 5: nomeFerramenta = "Ajuda Do Professor"; break;
-                            default: nomeFerramenta = "Ferramenta Desconhecida";
-                        }
+
+                        String nomeFerramenta = switch (id) {
+                            case 0 -> "Herança";
+                            case 1 -> "Programação Funcional";
+                            case 2 -> "Testes Unitários";
+                            case 3 -> "Tratamento de Excepções";
+                            case 4 -> "IDE";
+                            case 5 -> "Ajuda Do Professor";
+                            default -> "Ferramenta Desconhecida";
+                        };
 
                         board.getFerramentas().put(posicao, new Ferramenta(id, nomeFerramenta));
-                    } else {
+                    }
+                    else {
                         // tipo inválido
                         return false;
                     }
+
 
                 } catch (Exception e) {
                     return false;
