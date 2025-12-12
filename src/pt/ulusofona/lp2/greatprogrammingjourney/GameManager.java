@@ -374,14 +374,30 @@ public class GameManager {
     }
 
     public String[] getSlotInfo(int position) {
-        //posição fora do tabuleiro
+        // posição fora do tabuleiro
         if (position < 1 || position > board.getTamanho()) {
             return null;
         }
-        // verificar se há abismo
+
+        // --- [0] IDs dos jogadores ---
+        StringBuilder ids = new StringBuilder();
+        for (Player p : board.getJogadores().values()) {
+            if (p.getPosicao() == position) {
+                if (ids.length() > 0) {
+                    ids.append(",");
+                }
+                ids.append(p.getId());
+            }
+        }
+
+        // --- [1] Descrição ---
+        String descricao = "";
+        String tipoEId = "";
+
+        // verificar abismos
         if (board.getAbismos().containsKey(position)) {
             Abismo a = board.getAbismos().get(position);
-            String nome = switch (a.getId()) {
+            descricao = switch (a.getId()) {
                 case 0 -> "Erro de Sintaxe";
                 case 1 -> "Erro de Lógica";
                 case 2 -> "Exception";
@@ -394,18 +410,24 @@ public class GameManager {
                 case 9 -> "Segmentation Fault";
                 default -> "Desconhecido";
             };
-            return new String[]{"Abyss", String.valueOf(a.getId()), nome};
+            tipoEId = "A:" + a.getId();
         }
 
-        // verificar se há ferramenta
-        if (board.getFerramentas().containsKey(position)) {
+        // verificar ferramentas (só se não houver abismo)
+        else if (board.getFerramentas().containsKey(position)) {
             Ferramenta f = board.getFerramentas().get(position);
-            return new String[]{"Tool", String.valueOf(f.getId()), f.getNome()};
+            descricao = f.getNome();
+            tipoEId = "T:" + f.getId();
         }
 
-        // caso não haja nada especial nessa posição
-        return new String[]{};
+        // --- Retornar sempre 3 elementos ---
+        return new String[]{
+                ids.toString(),
+                descricao,
+                tipoEId
+        };
     }
+
 
     public int getCurrentPlayerID() {
         //se o tabuleiro ainda não tem jogadores
