@@ -509,28 +509,29 @@ public class GameManager {
         int turnoAtual = board.getTurnos();
         board.setTurnos(turnoAtual + 1);
 
-        int proximoID = -1;
-        int menorID = Integer.MAX_VALUE;
+        // lista ordenada dos IDs dos jogadores
+        List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
+        Collections.sort(ids);
 
-        // Encontrar o próximo jogador com ID superior ao atual
-        for (int id : board.getJogadores().keySet()) {
-            if (id > board.getCurrentPlayerID()) {
-                if (proximoID == -1 || id < proximoID) {
-                    proximoID = id;
-                }
-            }
-            if (id < menorID) {
-                menorID = id;
-            }
-        }
+        int atual = board.getCurrentPlayerID();
+        int proximoID;
 
-        // Se não há nenhum jogador com ID maior, volta ao primeiro (menor ID)
-        if (proximoID == -1) {
-            proximoID = menorID;
+        // encontrar posição do atual na lista
+        int index = ids.indexOf(atual);
+        if (index == -1 || ids.size() == 0) {
+            // segurança: se não existir, começa pelo menor
+            proximoID = ids.get(0);
+        } else if (index == ids.size() - 1) {
+            // último jogador → volta ao primeiro
+            proximoID = ids.get(0);
+        } else {
+            // passa ao seguinte
+            proximoID = ids.get(index + 1);
         }
 
         board.setCurrentPlayerID(proximoID);
     }
+
 
 
     public String reactToAbyssOrTool() {
