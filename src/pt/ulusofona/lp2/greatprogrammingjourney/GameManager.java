@@ -191,8 +191,8 @@ public class GameManager {
                         return false;
                     }
 
-                    String tipo = linha[1].trim(); // ← tipo agora é String
-                    int id = Integer.parseInt(linha[0].trim());
+                    String tipo = linha[0].trim(); // ← tipo agora é String
+                    int id = Integer.parseInt(linha[1].trim());
                     int posicao = Integer.parseInt(linha[2].trim());
 
 // verificar posição

@@ -613,5 +613,85 @@ public class TestGameManager {
         assertFalse(result, "createInitialBoard deve retornar false quando há um Abismo e uma Ferramenta na mesma posição");
     }
 
+    @Test
+    public void testDiagnosticoFalhaCreateInitialBoard() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        // formato do professor → tipo | id | posição
+        String[][] abyssesAndTools = {
+                {"Tool", "0", "3"}
+        };
+
+        System.out.println("\n=== INÍCIO TESTE DIAGNÓSTICO ===");
+        System.out.println("Entrada: tipo=" + abyssesAndTools[0][0]
+                + ", id=" + abyssesAndTools[0][1]
+                + ", posição=" + abyssesAndTools[0][2]);
+
+        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        System.out.println("Resultado: " + result);
+
+        String[] slot = gm.getSlotInfo(3);
+        if (slot != null) {
+            for (int i = 0; i < slot.length; i++) {
+                System.out.println("slot[" + i + "] = '" + slot[i] + "'");
+            }
+        } else {
+            System.out.println("slot é null");
+        }
+        System.out.println("=== FIM TESTE ===");
+
+        assertTrue(result, "createInitialBoard deve retornar true com ferramenta válida");
+    }
+    @Test
+    public void testDiagnostico_Detalhado_CreateInitialBoard() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        // Formato correto: tipo | id | posição
+        String[][] abyssesAndTools = {
+                {"Tool", "0", "3"},
+                {"Abyss", "1", "5"}
+        };
+
+        System.out.println("\n=== TESTE DETALHADO ===");
+        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
+        System.out.println("Resultado final: " + result);
+
+        // Mostrar tudo que o board tem
+        System.out.println("\n--- Abismos ---");
+        gm.getBoard().getAbismos().forEach((pos, ab) ->
+                System.out.println("Pos " + pos + " → Abismo ID " + ab.getId()));
+
+        System.out.println("\n--- Ferramentas ---");
+        gm.getBoard().getFerramentas().forEach((pos, ferr) ->
+                System.out.println("Pos " + pos + " → Ferramenta ID " + ferr.getId()
+                        + " (" + ferr.getNome() + ")"));
+
+        // Mostrar slot específico
+        String[] slot3 = gm.getSlotInfo(3);
+        System.out.println("\nSlot 3:");
+        if (slot3 == null) {
+            System.out.println("slot3 é null");
+        } else {
+            for (int i = 0; i < slot3.length; i++) {
+                System.out.println("slot3[" + i + "] = " + slot3[i]);
+            }
+        }
+
+        assertTrue(result, "createInitialBoard deve retornar true");
+    }
+
+   
+
 
 }
