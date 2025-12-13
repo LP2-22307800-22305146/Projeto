@@ -108,4 +108,13 @@ public class Player {
         return preso;
     }
 
+    public void setPosicaoAnterior(int posicaoAnterior) {
+        this.posicaoAnterior = posicaoAnterior;
+    }
+
+    public void setPosicaoHaDoisTurnos(int posicaoHaDoisTurnos) {
+        this.posicaoHaDoisTurnos = posicaoHaDoisTurnos;
+    }
+
+
 }

@@ -6,7 +6,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestGameManager {
 
-    //  TESTES UNITÁRIOS PARA createInitialBoard()
+    private GameManager setupGameWithAbyss(int abyssId) {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+        String[][] abysses = {{"0", String.valueOf(abyssId), "5"}};
+        gm.createInitialBoard(players, 10, abysses);
+
+        Player ana = gm.getBoard().getJogadores().get(1);
+        ana.setPosicao(5);
+        gm.getBoard().setCurrentPlayerID(1);
+        gm.getBoard().setUltimoValorDado(6);
+        gm.getBoard().setTurnos(0);
+        return gm;
+    }
 
     // TESTES PARA O NÚMERO VÁLIDO DE JOGADORES
     @Test
@@ -750,6 +765,168 @@ public class TestGameManager {
         String r2 = gm.reactToAbyssOrTool();
         System.out.println("Reação abismo: " + r2);
     }
+
+
+
+
+    @Test
+    public void testAbismo0_ErroDeSintaxe() {
+        GameManager gm = setupGameWithAbyss(0);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Erro"));
+        assertEquals(4, ana.getPosicao(), "Erro de Sintaxe deve recuar 1 casa");
+    }
+
+    @Test
+    public void testAbismo1_ErroDeLogica() {
+        GameManager gm = setupGameWithAbyss(1);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        gm.getBoard().setUltimoValorDado(5); // dado=5 -> recua floor(5/2)=2
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Lógica"));
+        assertEquals(3, ana.getPosicao());
+    }
+
+    @Test
+    public void testAbismo2_Exception() {
+        GameManager gm = setupGameWithAbyss(2);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Exception"));
+        assertEquals(3, ana.getPosicao());
+    }
+
+    @Test
+    public void testAbismo3_FileNotFoundException() {
+        GameManager gm = setupGameWithAbyss(3);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("File"));
+        assertEquals(2, ana.getPosicao());
+    }
+
+    @Test
+    public void testAbismo4_Crash() {
+        GameManager gm = setupGameWithAbyss(4);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Crash"));
+        assertEquals(1, ana.getPosicao(), "Crash deve voltar à casa inicial");
+    }
+
+    @Test
+    public void testAbismo5_CodigoDuplicado() {
+        GameManager gm = setupGameWithAbyss(5);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        ana.setPosicaoAnterior(3);
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Duplicado"));
+        assertEquals(3, ana.getPosicao());
+    }
+
+    @Test
+    public void testAbismo6_EfeitosSecundarios() {
+        GameManager gm = setupGameWithAbyss(6);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        ana.setPosicaoAnterior(4);
+        ana.setPosicaoHaDoisTurnos(2);
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Secundário"));
+        assertEquals(2, ana.getPosicao());
+    }
+
+    @Test
+    public void testAbismo7_BlueScreen() {
+        GameManager gm = setupGameWithAbyss(7);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Blue"));
+        assertTrue(ana.isDerrotado());
+    }
+
+    @Test
+    public void testAbismo8_CicloInfinito() {
+        GameManager gm = setupGameWithAbyss(8);
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("ciclo"));
+        assertTrue(ana.isPreso());
+    }
+
+    @Test
+    public void testAbismo9_SegmentationFault() {
+        GameManager gm = setupGameWithAbyss(9);
+        Player ana = gm.getBoard().getJogadores().get(1);
+        Player bruno = gm.getBoard().getJogadores().get(2);
+
+        bruno.setPosicao(5); // mesmo sítio que Ana
+        String msg = gm.reactToAbyssOrTool();
+        assertNotNull(msg);
+        assertTrue(msg.contains("Segmentation"));
+        assertEquals(2, ana.getPosicao());
+        assertEquals(2, bruno.getPosicao());
+    }
+
+    @Test
+    public void diagnosticoAbismos() {
+        GameManager gm;
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        for (int id = 0; id <= 9; id++) {
+            gm = new GameManager();
+            String[][] abysses = {{"0", String.valueOf(id), "5"}};
+
+            boolean ok = gm.createInitialBoard(players, 10, abysses);
+            if (!ok) {
+                System.out.println("❌ Erro ao criar board com abismo " + id);
+                continue;
+            }
+
+            Player ana = gm.getBoard().getJogadores().get(1);
+            if (ana == null) {
+                System.out.println("⚠️ Jogador não encontrado para abismo " + id);
+                continue;
+            }
+
+            // Preparar simulação
+            ana.setPosicao(5);
+            gm.getBoard().setUltimoValorDado(6);
+            gm.getBoard().setCurrentPlayerID(1);
+            gm.getBoard().setTurnos(0);
+
+            String msg = gm.reactToAbyssOrTool();
+
+            System.out.println("Abismo " + id + ":");
+            System.out.println("Mensagem -> " + msg);
+            System.out.println("Posição final -> " + ana.getPosicao());
+            System.out.println("Derrotado -> " + ana.isDerrotado());
+            System.out.println("Preso -> " + ana.isPreso());
+            System.out.println("-----------------------------");
+        }
+    }
+
 
 }
 

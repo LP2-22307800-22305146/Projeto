@@ -166,12 +166,11 @@ public class GameManager {
     }
 
     public boolean createInitialBoard(String[][] playerInfo, int worldSize, String[][] abyssesAndTools) {
-
         if (!createInitialBoard(playerInfo,worldSize)) {
-            System.out.println("❌ Falhou na criação dos jogadores da Parte 1");
+            System.out.println("Falhou na criação dos jogadores da Parte 1");
             return false;
         }
-        System.out.println("✅ Parte 1 (jogadores) criada com sucesso!");
+        System.out.println("Parte 1 (jogadores) criada com sucesso!");
 
         // ===============================
         // Processar Abismos e Ferramentas
@@ -464,73 +463,75 @@ public class GameManager {
     }
 
     public boolean moveCurrentPlayer(int nrSpaces) {
-
+        // valida se o valor do dado é entre 1 e 6
         if (nrSpaces < 1 || nrSpaces > 6) {
             return false;
         }
 
+        // guardar o valor do dado para uso posterior em abismos (ex: Erro de Lógica)
+        board.setUltimoValorDado(nrSpaces);
+
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
-        if (jogadorAtual == null || jogadorAtual.isDerrotado()) {
+        // verificar se o jogador existe e está ativo
+        if (jogadorAtual == null || jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
             return false;
         }
+
+        // atualizar histórico antes de alterar a posição
+        jogadorAtual.atualizarHistorico();
 
         int tamanho = board.getTamanho();
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
 
-        // Ricochete
+        // se ultrapassar o final do tabuleiro, faz ricochete
         if (novaPosicao > tamanho) {
             int excesso = novaPosicao - tamanho;
             novaPosicao = tamanho - excesso;
         }
 
+        // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
 
-        //Incrementar SEMPRE o turno, mesmo se for a jogada de vitória
+        // incrementar o número total de turnos
         board.setTurnos(board.getTurnos() + 1);
 
-        // Agora verifica se chegou ao fim depois de contar
+        // se o jogador chegou ao fim, o jogo termina
         if (novaPosicao == tamanho) {
-            return true; // jogo termina após contar turno
+            return true;
         }
 
-        // Passar turno normalmente
+        // passar o turno para o próximo jogador
         ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
         idsOrdenados.sort(Integer::compareTo);
         int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
         board.setCurrentPlayerID(proximo);
-
-
 
         return true;
     }
 
 
     public String reactToAbyssOrTool() {
-        // === Determinar corretamente quem deve reagir ===
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
         int idParaReagir;
         int atual = board.getCurrentPlayerID();
 
-        // Caso especial: testes unitários (sem turnos ainda)
+        // se for o início do jogo ou existir apenas um jogador
         if (board.getTurnos() == 0 || ids.size() == 1) {
             idParaReagir = atual;
         } else {
+            // o jogador que reagirá é o que acabou de jogar (anterior)
             int indexAtual = ids.indexOf(atual);
-            if (indexAtual == 0) {
-                idParaReagir = ids.get(ids.size() - 1);
-            } else {
-                idParaReagir = ids.get(indexAtual - 1);
-            }
+            idParaReagir = (indexAtual == 0) ? ids.get(ids.size() - 1) : ids.get(indexAtual - 1);
         }
 
         Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
 
-        // === Ferramenta ===
+        // verificar se há uma ferramenta na casa atual
         if (board.getFerramentas().containsKey(posicao)) {
             Ferramenta f = board.getFerramentas().get(posicao);
             if (!jogador.temFerramenta(f)) {
@@ -544,74 +545,92 @@ public class GameManager {
             }
         }
 
-        // === Abismo ===
+        // verificar se há um abismo na casa atual
         if (board.getAbismos().containsKey(posicao)) {
             Abismo a = board.getAbismos().get(posicao);
 
+            // se o jogador tiver ferramenta, o abismo é anulado
             if (jogador.temFerramentaQueAnula(a)) {
                 jogador.usarFerramentaContra(a);
                 board.setTurnos(board.getTurnos() + 1);
                 return jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
             }
 
-            // Caso não tenha ferramenta
             int novaPos = jogador.getPosicao();
+
             switch (a.getId()) {
-                case 0: // Erro de Sintaxe
+                case 0:
+                    // Erro de Sintaxe → recua 1 casa
                     novaPos = Math.max(1, novaPos - 1);
                     break;
 
-                case 1: // Erro de Lógica → recua N casas (N = floor(dado / 2))
-                    int dado = board.getUltimoValorDado(); // ⚠️ garantir que guardas o valor do dado em moveCurrentPlayer()
+                case 1:
+                    // Erro de Lógica → recua N casas, N = floor(valor do dado / 2)
+                    int dado = board.getUltimoValorDado();
                     int n = (int) Math.floor(dado / 2.0);
                     novaPos = Math.max(1, novaPos - n);
                     break;
 
-                case 2: // Exception
+                case 2:
+                    // Exception → recua 2 casas
                     novaPos = Math.max(1, novaPos - 2);
                     break;
 
-                case 3: // FileNotFoundException
+                case 3:
+                    // FileNotFoundException → recua 3 casas
                     novaPos = Math.max(1, novaPos - 3);
                     break;
 
-                case 4: // Crash
+                case 4:
+                    // Crash → volta à primeira casa
                     novaPos = 1;
                     break;
 
-                case 5: // Código Duplicado → volta para a posição anterior
+                case 5:
+                    // Código Duplicado → volta para a posição anterior
                     novaPos = jogador.getPosicaoAnterior();
                     break;
 
-                case 6: // Efeitos Secundários → volta à posição de 2 jogadas atrás
+                case 6:
+                    // Efeitos Secundários → volta à posição de há dois turnos
                     novaPos = jogador.getPosicaoHaDoisTurnos();
                     break;
 
-                case 7: // Blue Screen of Death → jogador derrotado
+                case 7:
+                    // Blue Screen of Death → o jogador é derrotado
                     jogador.setDerrotado(true);
                     board.setTurnos(board.getTurnos() + 1);
                     return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
 
-                case 8: // Ciclo Infinito → jogador fica preso
+                case 8:
+                    // Ciclo Infinito → o jogador fica preso, mas o jogo continua
                     jogador.setPreso(true);
                     board.setTurnos(board.getTurnos() + 1);
                     return jogador.getNome() + " ficou preso num ciclo infinito!";
 
-                case 9: // Segmentation Fault → todos os jogadores nessa casa recuam 3
-                    for (Player p : board.getJogadores().values()) {
-                        if (p.getPosicao() == posicao) {
-                            p.setPosicao(Math.max(1, p.getPosicao() - 3));
+                case 9:
+                    // Segmentation Fault → todos os jogadores na mesma casa recuam 3 casas,
+                    // apenas se houver dois ou mais jogadores nessa posição
+                    long count = board.getJogadores().values().stream()
+                            .filter(p -> p.getPosicao() == posicao)
+                            .count();
+                    if (count > 1) {
+                        for (Player p : board.getJogadores().values()) {
+                            if (p.getPosicao() == posicao) {
+                                p.setPosicao(Math.max(1, p.getPosicao() - 3));
+                            }
                         }
                     }
                     break;
             }
 
+            // atualizar posição e turno
             jogador.setPosicao(novaPos);
             board.setTurnos(board.getTurnos() + 1);
             return jogador.getNome() + " caiu no abismo " + a.getNome() + " e foi parar à casa " + novaPos + "!";
         }
 
-        // === Casa vazia ===
+        // casa vazia, apenas incrementa turno
         board.setTurnos(board.getTurnos() + 1);
         return null;
     }
