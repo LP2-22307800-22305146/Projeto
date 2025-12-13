@@ -9,7 +9,9 @@ public class Player {
     private int posicao;
     private ArrayList<String> linguagensFavoritas = new ArrayList<>();
     private ArrayList<Ferramenta> ferramentas = new ArrayList<>();
-
+    private int posicaoAnterior = 1;
+    private int posicaoHaDoisTurnos = 1;
+    private boolean preso = false;
     private boolean derrotado = false;
 
     public Player(int id, String nome, String cor) {
@@ -24,11 +26,18 @@ public class Player {
     public String getNome() { return nome; }
     public String getCor() { return cor; }
     public int getPosicao() { return posicao; }
+    public int getPosicaoAnterior() { return posicaoAnterior; }
+    public int getPosicaoHaDoisTurnos() { return posicaoHaDoisTurnos; }
     public ArrayList<Ferramenta> getFerramentas () {
         return ferramentas;
     }
     public ArrayList<String> getLinguagensFavoritas() {
         return linguagensFavoritas;
+    }
+
+    public void atualizarHistorico() {
+        posicaoHaDoisTurnos = posicaoAnterior;
+        posicaoAnterior = posicao;
     }
 
     // Setters
@@ -38,6 +47,10 @@ public class Player {
     public void setDerrotado(boolean derrotado) {
         this.derrotado = derrotado;
     }
+    public void setPreso(boolean preso) {
+        this.preso = preso;
+    }
+
 
 
     //atualiza posição (mover n casas)
@@ -90,5 +103,9 @@ public class Player {
         }
     }
 
+
+    public boolean isPreso() {
+        return preso;
+    }
 
 }

@@ -10,6 +10,7 @@ public class Board {
     private int turnos;     // contador de turnos
     private HashMap<Integer, Abismo> abismos = new HashMap<>();
     private HashMap<Integer, Ferramenta> ferramentas = new HashMap<>();
+    private int ultimoValorDado = 0;
 
     public Board() {
         this.jogadores = new HashMap<>();
@@ -59,7 +60,13 @@ public class Board {
         this.turnos = turnos;
     }
 
+    public int getUltimoValorDado() {
+        return ultimoValorDado;
+    }
 
+    public void setUltimoValorDado(int valor) {
+        this.ultimoValorDado = valor;
+    }
 
     public void printBoard() {
         System.out.println("=== Estado atual do tabuleiro ===");
@@ -78,5 +85,6 @@ public class Board {
             System.out.println(" - " + f);
         }
     }
+
 
 }
