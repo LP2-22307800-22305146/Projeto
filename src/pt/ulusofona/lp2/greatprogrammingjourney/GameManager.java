@@ -3,10 +3,7 @@ package pt.ulusofona.lp2.greatprogrammingjourney;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class GameManager {
 
@@ -171,8 +168,10 @@ public class GameManager {
     public boolean createInitialBoard(String[][] playerInfo, int worldSize, String[][] abyssesAndTools) {
 
         if (!createInitialBoard(playerInfo,worldSize)) {
+            System.out.println("❌ Falhou na criação dos jogadores da Parte 1");
             return false;
         }
+        System.out.println("✅ Parte 1 (jogadores) criada com sucesso!");
 
         // ===============================
         // Processar Abismos e Ferramentas
@@ -184,37 +183,36 @@ public class GameManager {
             board.getFerramentas().clear();
 
             for (String[] linha : abyssesAndTools) {
-
+                System.out.println("Linha recebida (createInitialBoard): " + Arrays.toString(linha));
                 try {
-                    // Cada linha deve ter exatamente 3 elementos: [id, tipo, posição]
+                    // Validação básica
                     if (linha == null || linha.length != 3) {
                         return false;
                     }
 
-                    String tipo = linha[0].trim(); // ← tipo agora é String
+
+                    int tipo = Integer.parseInt(linha[0].trim());; // ← tipo agora é String
                     int id = Integer.parseInt(linha[1].trim());
                     int posicao = Integer.parseInt(linha[2].trim());
 
 // verificar posição
-                    // posição válida?
+                    // Posição válida
                     if (posicao < 1 || posicao > worldSize) {
                         return false;
                     }
 
-//nova verificação impedir sobreposição de abismo/ferramenta
+                    // Evitar sobreposição
                     if (board.getAbismos().containsKey(posicao) || board.getFerramentas().containsKey(posicao)) {
                         return false;
                     }
 
-                    if (tipo.equalsIgnoreCase("Abyss") || tipo.equals("0")) {
-                        // id válido: 0 a 9
+                    // Verificar tipo
+                    if (tipo == 0) {
                         if (id < 0 || id > 9) {
                             return false;
                         }
                         board.getAbismos().put(posicao, new Abismo(id, posicao));
-                    }
-                    else if (tipo.equalsIgnoreCase("Tool") || tipo.equals("1")) {
-                        // id válido: 0 a 5
+                    } else if (tipo == 1) {
                         if (id < 0 || id > 5) {
                             return false;
                         }
@@ -230,14 +228,13 @@ public class GameManager {
                         };
 
                         board.getFerramentas().put(posicao, new Ferramenta(id, nomeFerramenta));
+                    } else {
+                        return false;
                     }
-                    else {
-                        return false; // tipo inválido
-                    }
-
-
 
                 } catch (Exception e) {
+                    System.out.println("Exceção detectada: " + e.getMessage());
+                    e.printStackTrace();
                     return false;
                 }
             }
@@ -508,11 +505,79 @@ public class GameManager {
         return true;
     }
 
-    public String reactToAbyssOrTool() {
+    private void avancarTurno() {
+        int turnoAtual = board.getTurnos();
+        board.setTurnos(turnoAtual + 1);
 
-        return null;
+        int proximoID = -1;
+        int menorID = Integer.MAX_VALUE;
 
+        // Encontrar o próximo jogador com ID superior ao atual
+        for (int id : board.getJogadores().keySet()) {
+            if (id > board.getCurrentPlayerID()) {
+                if (proximoID == -1 || id < proximoID) {
+                    proximoID = id;
+                }
+            }
+            if (id < menorID) {
+                menorID = id;
+            }
+        }
+
+        // Se não há nenhum jogador com ID maior, volta ao primeiro (menor ID)
+        if (proximoID == -1) {
+            proximoID = menorID;
+        }
+
+        board.setCurrentPlayerID(proximoID);
     }
+
+
+    public String reactToAbyssOrTool() {
+        Player jogadorAtual = board.getJogadores().get(board.getCurrentPlayerID());
+        if (jogadorAtual == null) {
+            System.out.println("Nenhum jogador atual definido!");
+            return null;
+        }
+
+        int posicao = jogadorAtual.getPosicao();
+        System.out.println("Jogador atual: " + jogadorAtual.getNome() + " está na posição " + posicao);
+
+        // Verificar se há ferramenta
+        if (board.getFerramentas().containsKey(posicao)) {
+            Ferramenta f = board.getFerramentas().get(posicao);
+            if (!jogadorAtual.temFerramenta(f)) {
+                jogadorAtual.adicionarFerramenta(f);
+                board.getFerramentas().remove(posicao);
+                avancarTurno();
+                return jogadorAtual.getNome() + " encontrou a ferramenta " + f.getNome() + " e adicionou ao inventário.";
+            } else {
+                avancarTurno();
+                return jogadorAtual.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
+            }
+        }
+
+        // Verificar se há abismo
+        if (board.getAbismos().containsKey(posicao)) {
+            Abismo a = board.getAbismos().get(posicao);
+            String nomeAbismo = a.getNome();
+            if (jogadorAtual.temFerramentaQueAnula(a)) {
+                jogadorAtual.usarFerramentaContra(a);
+                avancarTurno();
+                return jogadorAtual.getNome() + " evitou o abismo " + nomeAbismo + " com uma ferramenta!";
+            } else {
+                jogadorAtual.setPosicao(1); // volta ao início
+                avancarTurno();
+                return jogadorAtual.getNome() + " caiu no abismo " + nomeAbismo + " e voltou ao início!";
+            }
+        }
+
+        // Casa vazia
+        avancarTurno();
+        return null;
+    }
+
+
 
     public boolean gameIsOver() {
         //se o tabuleiro não tem jogadores, o jogo não pode ter terminado

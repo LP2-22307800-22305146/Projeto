@@ -396,7 +396,7 @@ public class TestGameManager {
         };
 
         String[][] abyssesAndTools = {
-                {"0", "Abyss", "3"} // Erro de Sintaxe na posição 3
+                {"0", "0", "3"} // Erro de Sintaxe na posição 3
         };
 
         assertTrue(gm.createInitialBoard(players, 10, abyssesAndTools),
@@ -415,7 +415,7 @@ public class TestGameManager {
         };
 
         String[][] abyssesAndTools = {
-                {"4", "Tool", "5"} // Ferramenta IDE na posição 5
+                {"1", "4", "5"} // Ferramenta IDE na posição 5
         };
 
         assertTrue(gm.createInitialBoard(players, 10, abyssesAndTools),
@@ -525,7 +525,7 @@ public class TestGameManager {
 
         // Abismo válido: Erro de Sintaxe (id=0), posição=3
         String[][] abyssesAndTools = {
-                {"0", "Abyss", "3"}
+                {"0", "0", "3"}
         };
 
         boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
@@ -551,7 +551,7 @@ public class TestGameManager {
 
         // Ferramenta válida: IDE (id=4), posição=5
         String[][] abyssesAndTools = {
-                {"4", "Tool", "5"}
+                {"1", "4", "5"}
         };
 
         boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
@@ -624,7 +624,7 @@ public class TestGameManager {
 
         // formato do professor → tipo | id | posição
         String[][] abyssesAndTools = {
-                {"Tool", "0", "3"}
+                {"1", "0", "3"}
         };
 
         System.out.println("\n=== INÍCIO TESTE DIAGNÓSTICO ===");
@@ -659,8 +659,8 @@ public class TestGameManager {
 
         // Formato correto: tipo | id | posição
         String[][] abyssesAndTools = {
-                {"Tool", "0", "3"},
-                {"Abyss", "1", "5"}
+                {"1", "0", "3"},
+                {"0", "1", "5"}
         };
 
         System.out.println("\n=== TESTE DETALHADO ===");
@@ -691,7 +691,145 @@ public class TestGameManager {
         assertTrue(result, "createInitialBoard deve retornar true");
     }
 
-   
+    @Test
+    public void testCasaVazia_DeveRetornarNull() {
+        GameManager gm = new GameManager();
 
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+        String[][] abyssesAndTools = {}; // sem nada
+
+        gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        // Jogador atual (Ana) está na posição 1 — casa vazia
+        String resultado = gm.reactToAbyssOrTool();
+
+        assertNull(resultado, "Casa vazia deve retornar null");
+        assertEquals(1, gm.getBoard().getTurnos(), "Deve incrementar o contador de turnos");
+    }
+
+    @Test
+    public void testFerramenta_RecolheNova() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+        String[][] abyssesAndTools = {
+                {"1", "0", "3"} // Herança na posição 3
+        };
+
+        gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        // mover Ana até à posição 3
+        gm.getBoard().getJogadores().get(1).setPosicao(3);
+
+        String resultado = gm.reactToAbyssOrTool();
+
+        assertNotNull(resultado, "Deve retornar mensagem ao recolher ferramenta");
+        assertTrue(resultado.contains("Herança"), "Mensagem deve mencionar 'Herança'");
+        assertEquals(1, gm.getBoard().getTurnos(), "Turno deve ser incrementado");
+        assertEquals(0, gm.getBoard().getFerramentas().size(), "Ferramenta deve ser removida do tabuleiro");
+    }
+
+    @Test
+    public void testAbismo_SemFerramenta_DeveAplicarEfeito() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+        String[][] abyssesAndTools = {
+                {"0", "0", "4"} // Erro de Sintaxe
+        };
+
+        gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        // mover Ana para posição 4
+        gm.getBoard().getJogadores().get(1).setPosicao(4);
+
+        String resultado = gm.reactToAbyssOrTool();
+
+        assertNotNull(resultado, "Deve retornar mensagem ao cair num abismo");
+        assertTrue(resultado.contains("Erro"), "Mensagem deve mencionar 'Erro'");
+        assertEquals(1, gm.getBoard().getTurnos(), "Turno deve ser incrementado");
+        assertEquals(1, gm.getBoard().getJogadores().get(1).getPosicao(), "Jogador deve voltar ao início");
+    }
+
+    @Test
+    public void testAbismo_ComFerramenta_DeveAnularEfeito() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+        String[][] abyssesAndTools = {
+                {"0", "0", "5"} // Erro de Sintaxe
+        };
+
+        gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        // Dar ferramenta à Ana manualmente
+        Ferramenta ferramenta = new Ferramenta(0, "Herança");
+        gm.getBoard().getJogadores().get(1).adicionarFerramenta(ferramenta);
+
+        // mover Ana para o abismo
+        gm.getBoard().getJogadores().get(1).setPosicao(5);
+
+        String resultado = gm.reactToAbyssOrTool();
+
+        assertNotNull(resultado, "Deve retornar mensagem ao anular abismo");
+        assertTrue(resultado.contains("evitou"), "Mensagem deve mencionar que o abismo foi evitado");
+        assertEquals(1, gm.getBoard().getTurnos(), "Turno deve ser incrementado");
+        assertEquals(5, gm.getBoard().getJogadores().get(1).getPosicao(), "Jogador deve continuar na mesma posição");
+    }
+
+    @Test
+    public void testDiagnostico_Reacoes() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+        String[][] abyssesAndTools = {
+                {"1", "0", "3"},
+                {"0", "0", "4"}
+        };
+
+        gm.createInitialBoard(players, 10, abyssesAndTools);
+
+        // Mostrar o conteúdo real do board
+        System.out.println("=== Diagnóstico ===");
+        System.out.println("Ferramentas no tabuleiro:");
+        gm.getBoard().getFerramentas().forEach((pos, f) ->
+                System.out.println(" -> posição " + pos + " = " + f.getNome() + " (id=" + f.getId() + ")")
+        );
+
+        System.out.println("Abismos no tabuleiro:");
+        gm.getBoard().getAbismos().forEach((pos, a) ->
+                System.out.println(" -> posição " + pos + " = " + a.getId())
+        );
+
+        Player ana = gm.getBoard().getJogadores().get(1);
+
+        // testar ferramenta
+        ana.setPosicao(3);
+        String r1 = gm.reactToAbyssOrTool();
+        System.out.println("Reação ferramenta: " + r1);
+
+        // testar abismo
+        ana.setPosicao(4);
+        String r2 = gm.reactToAbyssOrTool();
+        System.out.println("Reação abismo: " + r2);
+    }
 
 }
+
+
+

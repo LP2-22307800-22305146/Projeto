@@ -60,4 +60,35 @@ public class Player {
         return derrotado;
     }
 
+    //verifica se o jogador já possui uma ferramenta com o mesmo nome
+    public boolean temFerramenta(Ferramenta f) {
+        for (Ferramenta existente : ferramentas) {
+            if (existente.getId() == f.getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //adiciona uma ferramenta ao jogador (se ainda não a tiver)
+    public void adicionarFerramenta(Ferramenta f) {
+        if (!temFerramenta(f)) {
+            ferramentas.add(f);
+        }
+    }
+
+    //verifica se o jogador tem uma ferramenta que anula o abismo
+    // (por agora simplificamos: qualquer ferramenta pode anular um abismo)
+    public boolean temFerramentaQueAnula(Abismo a) {
+        return !ferramentas.isEmpty();
+    }
+
+    //(remove) uma ferramenta para anular um abismo
+    public void usarFerramentaContra(Abismo a) {
+        if (!ferramentas.isEmpty()) {
+            ferramentas.remove(0); // consome a primeira ferramenta
+        }
+    }
+
+
 }
