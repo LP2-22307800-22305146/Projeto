@@ -196,11 +196,16 @@ public class GameManager {
                     int posicao = Integer.parseInt(linha[2].trim());
 
 // verificar posição
+                    // posição válida?
                     if (posicao < 1 || posicao > worldSize) {
                         return false;
                     }
 
-// verificar tipo e id
+// 🚨 nova verificação — impedir sobreposição de abismo/ferramenta
+                    if (board.getAbismos().containsKey(posicao) || board.getFerramentas().containsKey(posicao)) {
+                        return false;
+                    }
+
                     if (tipo.equalsIgnoreCase("Abyss") || tipo.equals("0")) {
                         // id válido: 0 a 9
                         if (id < 0 || id > 9) {
@@ -227,9 +232,9 @@ public class GameManager {
                         board.getFerramentas().put(posicao, new Ferramenta(id, nomeFerramenta));
                     }
                     else {
-                        // tipo inválido
-                        return false;
+                        return false; // tipo inválido
                     }
+
 
 
                 } catch (Exception e) {
@@ -398,7 +403,7 @@ public class GameManager {
         if (board.getAbismos().containsKey(position)) {
             Abismo a = board.getAbismos().get(position);
             descricao = switch (a.getId()) {
-                case 0 -> "Erro de Sintaxe";
+                case 0 -> "Erro de sintaxe";
                 case 1 -> "Erro de Lógica";
                 case 2 -> "Exception";
                 case 3 -> "FileNotFoundException";

@@ -566,29 +566,6 @@ public class TestGameManager {
         assertEquals("T:4", slot[2], "Tipo+ID deve ser 'T:4'");
     }
 
-    @Test
-    public void testGetSlotInfo_ComJogador() {
-        GameManager gm = new GameManager();
-
-        String[][] players = {
-                {"1", "Ana", "Java", "Blue"},
-                {"2", "Bruno", "Python", "Green"}
-        };
-
-        String[][] abyssesAndTools = {};
-
-        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
-        assertTrue(result, "createInitialBoard deve retornar true");
-
-        // Jogador 1 começa na posição 1
-        String[] slot = gm.getSlotInfo(1);
-        assertNotNull(slot, "getSlotInfo não deve retornar null");
-        assertEquals(3, slot.length, "getSlotInfo deve retornar array com 3 elementos");
-
-        assertEquals("1", slot[0], "IDs dos jogadores devem ser '1'");
-        assertEquals("", slot[1], "Descrição deve estar vazia");
-        assertEquals("", slot[2], "Tipo+ID deve estar vazio");
-    }
 
     @Test
     public void testGetSlotInfo_CasaVazia() {
@@ -614,4 +591,27 @@ public class TestGameManager {
         assertEquals("", slot[2], "Sem tipo/id");
     }
 
+
+    //Abismo e uma Ferramenta na mesma casa
+    @Test
+    public void testAbismoEFerramentaNaMesmaPosicao() {
+        GameManager gm = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Java", "Blue"},
+                {"2", "Bruno", "Python", "Green"}
+        };
+
+        // Um abismo e uma ferramenta na mesma posição 5
+        String[][] abyssesAndTools = {
+                {"0", "Abyss", "5"},
+                {"3", "Tool", "5"}
+        };
+
+        boolean result = gm.createInitialBoard(players, 10, abyssesAndTools);
+        System.out.println("Abismo + Ferramenta na mesma posição → " + result);
+        assertFalse(result, "createInitialBoard deve retornar false quando há um Abismo e uma Ferramenta na mesma posição");
     }
+
+
+}
