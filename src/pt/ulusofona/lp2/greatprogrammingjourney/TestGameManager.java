@@ -536,7 +536,7 @@ public class TestGameManager {
         assertEquals(3, slot.length, "getSlotInfo deve retornar array com 3 elementos");
 
         assertEquals("", slot[0], "Não deve haver jogadores nesta casa");
-        assertEquals("Erro de Sintaxe", slot[1], "Descrição deve ser 'Erro de Sintaxe'");
+        assertEquals("Erro de sintaxe", slot[1], "Descrição deve ser 'Erro de sintaxe'");
         assertEquals("A:0", slot[2], "Tipo+ID deve ser 'A:0'");
     }
 

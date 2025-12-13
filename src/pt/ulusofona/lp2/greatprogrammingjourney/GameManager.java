@@ -191,8 +191,8 @@ public class GameManager {
                         return false;
                     }
 
-                    int id = Integer.parseInt(linha[0].trim());
                     String tipo = linha[1].trim(); // ← tipo agora é String
+                    int id = Integer.parseInt(linha[0].trim());
                     int posicao = Integer.parseInt(linha[2].trim());
 
 // verificar posição
@@ -201,7 +201,7 @@ public class GameManager {
                         return false;
                     }
 
-// 🚨 nova verificação — impedir sobreposição de abismo/ferramenta
+//nova verificação impedir sobreposição de abismo/ferramenta
                     if (board.getAbismos().containsKey(posicao) || board.getFerramentas().containsKey(posicao)) {
                         return false;
                     }
