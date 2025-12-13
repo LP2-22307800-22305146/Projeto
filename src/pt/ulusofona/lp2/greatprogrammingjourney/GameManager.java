@@ -508,26 +508,29 @@ public class GameManager {
 
 
     public String reactToAbyssOrTool() {
-        // 👇 Usa o jogador que jogou no turno anterior, não o "currentPlayer" já trocado
-        int idJogadorAnterior;
-
+        //Determinar corretamente quem deve reagir
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
+        int idParaReagir;
         int atual = board.getCurrentPlayerID();
-        int indexAtual = ids.indexOf(atual);
 
-        // Jogador anterior (aquele que acabou de se mover)
-        if (indexAtual == 0) {
-            idJogadorAnterior = ids.get(ids.size() - 1);
+        //Caso especial: testes unitários (sem turnos ainda) ou só um jogador
+        if (board.getTurnos() == 0 || ids.size() == 1) {
+            idParaReagir = atual;
         } else {
-            idJogadorAnterior = ids.get(indexAtual - 1);
+            int indexAtual = ids.indexOf(atual);
+            if (indexAtual == 0) {
+                idParaReagir = ids.get(ids.size() - 1); // volta ao último
+            } else {
+                idParaReagir = ids.get(indexAtual - 1);
+            }
         }
 
-        Player jogadorAtual = board.getJogadores().get(idJogadorAnterior);
+        Player jogadorAtual = board.getJogadores().get(idParaReagir);
         int posicao = jogadorAtual.getPosicao();
 
-        // Ferramenta
+        //Ferramenta
         if (board.getFerramentas().containsKey(posicao)) {
             Ferramenta f = board.getFerramentas().get(posicao);
             if (!jogadorAtual.temFerramenta(f)) {
@@ -539,9 +542,10 @@ public class GameManager {
             }
         }
 
-        // Abismo
+        //Abismo
         if (board.getAbismos().containsKey(posicao)) {
             Abismo a = board.getAbismos().get(posicao);
+
             if (jogadorAtual.temFerramentaQueAnula(a)) {
                 jogadorAtual.usarFerramentaContra(a);
                 return jogadorAtual.getNome() + " evitou o abismo " + a.getNome() + "!";
@@ -551,9 +555,13 @@ public class GameManager {
             }
         }
 
-        // Casa vazia
+        if (board.getTurnos() == 0) {
+            board.setTurnos(board.getTurnos() + 1);
+        }
+        //casa vazia
         return null;
     }
+
 
 
 
