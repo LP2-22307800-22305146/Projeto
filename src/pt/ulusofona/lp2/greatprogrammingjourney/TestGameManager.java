@@ -829,30 +829,6 @@ public class TestGameManager {
         System.out.println("Reação abismo: " + r2);
     }
 
-    @Test
-    public void testAvancarTurnoCircular() {
-        GameManager gm = new GameManager();
-        String[][] players = {
-                {"1", "Ana", "Java", "Blue"},
-                {"2", "Bruno", "Python", "Green"},
-                {"3", "Carla", "C#", "Purple"}
-        };
-
-        gm.createInitialBoard(players, 10, new String[0][0]);
-
-        // Deve começar no menor ID (1)
-        assertEquals(1, gm.getCurrentPlayerID());
-
-        gm.reactToAbyssOrTool(); // avança turno
-        assertEquals(2, gm.getCurrentPlayerID());
-
-        gm.reactToAbyssOrTool(); // avança turno
-        assertEquals(3, gm.getCurrentPlayerID());
-
-        gm.reactToAbyssOrTool(); // circular, volta ao 1
-        assertEquals(1, gm.getCurrentPlayerID());
-    }
-
 }
 
 

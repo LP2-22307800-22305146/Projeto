@@ -498,85 +498,65 @@ public class GameManager {
         // Passar turno normalmente
         ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
         idsOrdenados.sort(Integer::compareTo);
-
         int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
         board.setCurrentPlayerID(proximo);
+
+
 
         return true;
     }
 
-    private void avancarTurno() {
-        int turnoAtual = board.getTurnos();
-        board.setTurnos(turnoAtual + 1);
 
-        // lista ordenada dos IDs dos jogadores
+    public String reactToAbyssOrTool() {
+        // 👇 Usa o jogador que jogou no turno anterior, não o "currentPlayer" já trocado
+        int idJogadorAnterior;
+
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
         int atual = board.getCurrentPlayerID();
-        int proximoID;
+        int indexAtual = ids.indexOf(atual);
 
-        // encontrar posição do atual na lista
-        int index = ids.indexOf(atual);
-        if (index == -1 || ids.size() == 0) {
-            // segurança: se não existir, começa pelo menor
-            proximoID = ids.get(0);
-        } else if (index == ids.size() - 1) {
-            // último jogador → volta ao primeiro
-            proximoID = ids.get(0);
+        // Jogador anterior (aquele que acabou de se mover)
+        if (indexAtual == 0) {
+            idJogadorAnterior = ids.get(ids.size() - 1);
         } else {
-            // passa ao seguinte
-            proximoID = ids.get(index + 1);
+            idJogadorAnterior = ids.get(indexAtual - 1);
         }
 
-        board.setCurrentPlayerID(proximoID);
-    }
-
-
-
-    public String reactToAbyssOrTool() {
-        Player jogadorAtual = board.getJogadores().get(board.getCurrentPlayerID());
-        if (jogadorAtual == null) {
-            System.out.println("Nenhum jogador atual definido!");
-            return null;
-        }
-
+        Player jogadorAtual = board.getJogadores().get(idJogadorAnterior);
         int posicao = jogadorAtual.getPosicao();
-        System.out.println("Jogador atual: " + jogadorAtual.getNome() + " está na posição " + posicao);
 
-        // Verificar se há ferramenta
+        // Ferramenta
         if (board.getFerramentas().containsKey(posicao)) {
             Ferramenta f = board.getFerramentas().get(posicao);
             if (!jogadorAtual.temFerramenta(f)) {
                 jogadorAtual.adicionarFerramenta(f);
                 board.getFerramentas().remove(posicao);
-                avancarTurno();
-                return jogadorAtual.getNome() + " encontrou a ferramenta " + f.getNome() + " e adicionou ao inventário.";
+                return jogadorAtual.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
             } else {
-                avancarTurno();
                 return jogadorAtual.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
             }
         }
 
-        // Verificar se há abismo
+        // Abismo
         if (board.getAbismos().containsKey(posicao)) {
             Abismo a = board.getAbismos().get(posicao);
-            String nomeAbismo = a.getNome();
             if (jogadorAtual.temFerramentaQueAnula(a)) {
                 jogadorAtual.usarFerramentaContra(a);
-                avancarTurno();
-                return jogadorAtual.getNome() + " evitou o abismo " + nomeAbismo + " com uma ferramenta!";
+                return jogadorAtual.getNome() + " evitou o abismo " + a.getNome() + "!";
             } else {
-                jogadorAtual.setPosicao(1); // volta ao início
-                avancarTurno();
-                return jogadorAtual.getNome() + " caiu no abismo " + nomeAbismo + " e voltou ao início!";
+                jogadorAtual.setPosicao(1);
+                return jogadorAtual.getNome() + " caiu no abismo " + a.getNome() + " e voltou ao início!";
             }
         }
 
         // Casa vazia
-        avancarTurno();
         return null;
     }
+
+
+
 
 
 
