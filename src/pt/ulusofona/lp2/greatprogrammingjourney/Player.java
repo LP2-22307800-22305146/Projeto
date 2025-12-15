@@ -93,14 +93,17 @@ public class Player {
     //verifica se o jogador tem uma ferramenta que anula o abismo
     // (por agora simplificamos: qualquer ferramenta pode anular um abismo)
     public boolean temFerramentaQueAnula(Abismo a) {
-        return !ferramentas.isEmpty();
+        for (Ferramenta f : ferramentas) {
+            if (f.getId() == a.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //(remove) uma ferramenta para anular um abismo
     public void usarFerramentaContra(Abismo a) {
-        if (!ferramentas.isEmpty()) {
-            ferramentas.remove(0); // consome a primeira ferramenta
-        }
+        ferramentas.removeIf(f -> f.getId() == a.getId());
     }
 
 

@@ -415,7 +415,7 @@ public class GameManager {
         }
 
         // verificar ferramentas (só se não houver abismo)
-        else if (board.getFerramentas().containsKey(position)) {
+        if (board.getFerramentas().containsKey(position)) {
             Ferramenta f = board.getFerramentas().get(position);
             descricao = f.getNome();
             tipoEId = "T:" + f.getId();
@@ -513,6 +513,8 @@ public class GameManager {
 
 
     public String reactToAbyssOrTool() {
+
+        // Lista ordenada dos IDs dos jogadores
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
@@ -530,18 +532,25 @@ public class GameManager {
 
         Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
+        String mensagem = null;
 
         // verificar se há uma ferramenta na casa atual
         if (board.getFerramentas().containsKey(posicao)) {
+
             Ferramenta f = board.getFerramentas().get(posicao);
+
+            // Jogador recolhe a ferramenta se ainda não a tiver
             if (!jogador.temFerramenta(f)) {
+
                 jogador.adicionarFerramenta(f);
                 board.getFerramentas().remove(posicao);
                 board.setTurnos(board.getTurnos() + 1);
-                return jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
+                mensagem = jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
+
             } else {
-                board.setTurnos(board.getTurnos() + 1);
-                return jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
+
+                mensagem = jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
+
             }
         }
 
@@ -553,11 +562,13 @@ public class GameManager {
             if (jogador.temFerramentaQueAnula(a)) {
                 jogador.usarFerramentaContra(a);
                 board.setTurnos(board.getTurnos() + 1);
-                return jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
-            }
+
+                return (mensagem != null ? mensagem + " " : "")
+                        + jogador.getNome() + " evitou o abismo " + a.getNome() + "!";            }
 
             int novaPos = jogador.getPosicao();
 
+            // aplicar efeito do abismo
             switch (a.getId()) {
                 case 0:
                     // Erro de Sintaxe → recua 1 casa
@@ -600,14 +611,16 @@ public class GameManager {
                     // Blue Screen of Death → o jogador é derrotado
                     jogador.setDerrotado(true);
                     board.setTurnos(board.getTurnos() + 1);
-                    return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
 
+                    return (mensagem != null ? mensagem + " " : "")
+                            + jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
                 case 8:
                     // Ciclo Infinito → o jogador fica preso, mas o jogo continua
                     jogador.setPreso(true);
                     board.setTurnos(board.getTurnos() + 1);
-                    return jogador.getNome() + " ficou preso num ciclo infinito!";
 
+                    return (mensagem != null ? mensagem + " " : "")
+                            + jogador.getNome() + " ficou preso num ciclo infinito!";
                 case 9:
                     // Segmentation Fault → todos os jogadores na mesma casa recuam 3 casas,
                     // apenas se houver dois ou mais jogadores nessa posição
@@ -627,12 +640,14 @@ public class GameManager {
             // atualizar posição e turno
             jogador.setPosicao(novaPos);
             board.setTurnos(board.getTurnos() + 1);
-            return jogador.getNome() + " caiu no abismo " + a.getNome() + " e foi parar à casa " + novaPos + "!";
-        }
+
+            return (mensagem != null ? mensagem + " " : "")
+                    + jogador.getNome() + " caiu no abismo " + a.getNome()
+                    + " e foi parar à casa " + novaPos + "!";        }
 
         // casa vazia, apenas incrementa turno
         board.setTurnos(board.getTurnos() + 1);
-        return null;
+        return mensagem;
     }
 
 
