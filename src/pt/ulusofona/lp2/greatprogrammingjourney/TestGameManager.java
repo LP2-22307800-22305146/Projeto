@@ -374,7 +374,7 @@ public class TestGameManager {
         // O jogo termina
         assertTrue(gm.gameIsOver(), "O jogo deve terminar quando o jogador chega à meta.");
     }
-    
+
     // TESTE da getProgrammersInfo
     @Test
     public void testGetProgrammersInfo_FormatacaoCorreta() {

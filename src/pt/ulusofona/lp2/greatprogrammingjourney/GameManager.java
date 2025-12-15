@@ -756,90 +756,96 @@ public class GameManager {
             throw new FileNotFoundException("Ficheiro não encontrado: " + file.getName());
         }
 
-        try (Scanner sc = new Scanner(file)) {
+        try {
             board = new Board();
+            Scanner sc = new Scanner(file);
+            String secao = "";
 
             while (sc.hasNextLine()) {
                 String line = sc.nextLine().trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
 
+                // Identificar cabeçalhos principais
                 if (line.startsWith("BOARD_SIZE=")) {
                     board.setTamanho(Integer.parseInt(line.split("=")[1]));
+                    continue;
+                }
 
-                } else if (line.startsWith("TURN=")) {
+                if (line.startsWith("TURN=")) {
                     board.setTurnos(Integer.parseInt(line.split("=")[1]));
+                    continue;
+                }
 
-                } else if (line.startsWith("CURRENT_PLAYER=")) {
+                if (line.startsWith("CURRENT_PLAYER=")) {
                     board.setCurrentPlayerID(Integer.parseInt(line.split("=")[1]));
-
-                } else if (line.equals("[PLAYERS]")) {
-                    while (sc.hasNextLine()) {
-                        line = sc.nextLine().trim();
-                        if (line.isEmpty()) continue;
-                        if (line.startsWith("[")) break; // Sai quando começa próxima secção
-
-                        String[] p = line.split(";");
-                        Player jogador = new Player(Integer.parseInt(p[0]), p[1], p[2]);
-
-                        // linguagens
-                        if (!p[3].isEmpty()) {
-                            for (String l : p[3].split(",")) {
-                                jogador.adicionarLinguagem(l);
-                            }
-                        }
-
-                        // ferramentas
-                        if (!p[4].isEmpty()) {
-                            for (String fNome : p[4].split(",")) {
-                                Ferramenta f = new Ferramenta(0, fNome);
-                                jogador.adicionarFerramenta(f);
-                            }
-                        }
-
-                        jogador.setPosicao(Integer.parseInt(p[5]));
-                        if (p[6].equals("DERROTADO")) jogador.setDerrotado(true);
-
-                        board.getJogadores().put(jogador.getId(), jogador);
-                    }
+                    continue;
                 }
 
-                // Abismos
-                else if (line.equals("[ABISMS]")) {
-                    while (sc.hasNextLine()) {
-                        line = sc.nextLine().trim();
-                        if (line.isEmpty()) continue;
-                        if (line.startsWith("[TOOLS]")) break; // muda de secção
-
-                        String[] a = line.split(";");
-                        int id = Integer.parseInt(a[0]);
-                        int pos = Integer.parseInt(a[1]);
-                        board.getAbismos().put(pos, new Abismo(id, pos));
-                    }
+                // Detetar secções
+                if (line.equals("[PLAYERS]") || line.equals("[ABISMS]") || line.equals("[TOOLS]")) {
+                    secao = line;
+                    continue;
                 }
 
-                // Ferramentas
-                else if (line.equals("[TOOLS]")) {
-                    while (sc.hasNextLine()) {
-                        line = sc.nextLine().trim();
-                        if (line.isEmpty()) continue;
+                // --- PLAYERS ---
+                if (secao.equals("[PLAYERS]")) {
+                    String[] p = line.split(";");
+                    Player jogador = new Player(Integer.parseInt(p[0]), p[1], p[2]);
 
-                        String[] f = line.split(";");
-                        int id = Integer.parseInt(f[0]);
-                        int pos = Integer.parseInt(f[1]);
-
-                        String nome = switch (id) {
-                            case 0 -> "Herança";
-                            case 1 -> "Programação Funcional";
-                            case 2 -> "Testes Unitários";
-                            case 3 -> "Tratamento de Excepções";
-                            case 4 -> "IDE";
-                            case 5 -> "Ajuda Do Professor";
-                            default -> "Ferramenta Desconhecida";
-                        };
-
-                        board.getFerramentas().put(pos, new Ferramenta(id, nome));
+                    // Linguagens
+                    if (!p[3].isEmpty()) {
+                        for (String l : p[3].split(",")) {
+                            jogador.adicionarLinguagem(l);
+                        }
                     }
+
+                    // Ferramentas
+                    if (!p[4].isEmpty()) {
+                        for (String fNome : p[4].split(",")) {
+                            Ferramenta f = new Ferramenta(0, fNome);
+                            jogador.adicionarFerramenta(f);
+                        }
+                    }
+
+                    jogador.setPosicao(Integer.parseInt(p[5]));
+                    if (p[6].equals("DERROTADO")) {
+                        jogador.setDerrotado(true);
+                    }
+
+                    board.getJogadores().put(jogador.getId(), jogador);
+                }
+
+                // --- ABISMS ---
+                else if (secao.equals("[ABISMS]")) {
+                    String[] a = line.split(";");
+                    int id = Integer.parseInt(a[0]);
+                    int pos = Integer.parseInt(a[1]);
+                    board.getAbismos().put(pos, new Abismo(id, pos));
+                }
+
+                // --- TOOLS ---
+                else if (secao.equals("[TOOLS]")) {
+                    String[] f = line.split(";");
+                    int id = Integer.parseInt(f[0]);
+                    int pos = Integer.parseInt(f[1]);
+
+                    String nome = switch (id) {
+                        case 0 -> "Herança";
+                        case 1 -> "Programação Funcional";
+                        case 2 -> "Testes Unitários";
+                        case 3 -> "Tratamento de Excepções";
+                        case 4 -> "IDE";
+                        case 5 -> "Ajuda Do Professor";
+                        default -> "Ferramenta Desconhecida";
+                    };
+
+                    board.getFerramentas().put(pos, new Ferramenta(id, nome));
                 }
             }
+
+            sc.close();
 
         } catch (Exception e) {
             e.printStackTrace();
