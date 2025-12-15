@@ -757,8 +757,6 @@ public class GameManager {
         }
 
         try (Scanner sc = new Scanner(file)) {
-
-            // recriar board vazio
             board = new Board();
 
             while (sc.hasNextLine()) {
@@ -776,7 +774,8 @@ public class GameManager {
                 } else if (line.equals("[PLAYERS]")) {
                     while (sc.hasNextLine()) {
                         line = sc.nextLine().trim();
-                        if (line.isEmpty() || line.startsWith("[")) break;
+                        if (line.isEmpty()) continue;
+                        if (line.startsWith("[")) break; // Sai quando começa próxima secção
 
                         String[] p = line.split(";");
                         Player jogador = new Player(Integer.parseInt(p[0]), p[1], p[2]);
@@ -800,8 +799,6 @@ public class GameManager {
                         if (p[6].equals("DERROTADO")) jogador.setDerrotado(true);
 
                         board.getJogadores().put(jogador.getId(), jogador);
-
-                        if (line.startsWith("[")) break;
                     }
                 }
 
@@ -809,7 +806,8 @@ public class GameManager {
                 else if (line.equals("[ABISMS]")) {
                     while (sc.hasNextLine()) {
                         line = sc.nextLine().trim();
-                        if (line.isEmpty() || line.startsWith("[")) break;
+                        if (line.isEmpty()) continue;
+                        if (line.startsWith("[TOOLS]")) break; // muda de secção
 
                         String[] a = line.split(";");
                         int id = Integer.parseInt(a[0]);
@@ -822,7 +820,7 @@ public class GameManager {
                 else if (line.equals("[TOOLS]")) {
                     while (sc.hasNextLine()) {
                         line = sc.nextLine().trim();
-                        if (line.isEmpty() || line.startsWith("[")) break;
+                        if (line.isEmpty()) continue;
 
                         String[] f = line.split(";");
                         int id = Integer.parseInt(f[0]);
@@ -848,6 +846,7 @@ public class GameManager {
             throw new InvalidFileException("Erro a carregar o jogo: " + e.getMessage());
         }
     }
+
 
 
     public boolean saveGame(File file) {

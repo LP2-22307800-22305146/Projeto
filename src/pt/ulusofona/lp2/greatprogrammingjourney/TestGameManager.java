@@ -294,12 +294,19 @@ public class TestGameManager {
         assertTrue(gm.createInitialBoard(players, 10));
 
         int turnosAntes = gm.getBoard().getTurnos();
+
+        // o movimento em si não deve incrementar turno
         gm.moveCurrentPlayer(2);
+
+        // apenas após reagir (abismo/ferramenta/nada) é que conta um turno
+        gm.reactToAbyssOrTool();
+
         int turnosDepois = gm.getBoard().getTurnos();
 
         assertEquals(turnosAntes + 1, turnosDepois,
-                "O contador de turnos deve incrementar em 1 após cada movimento válido.");
+                "O contador de turnos deve incrementar em 1 após cada jogada completa (movimento + reação).");
     }
+
 
 
     // TESTES DA gameIsOver()
@@ -336,37 +343,38 @@ public class TestGameManager {
     void testContagemDeTurnosIncluiJogadaFinal() {
         GameManager gm = new GameManager();
 
-        //criar tabuleiro pequeno para testar rapidamente
+        // Criar tabuleiro pequeno
         String[][] jogadores = {
                 {"1", "Alice", "Java;Python", "Blue"},
                 {"2", "Bob", "C;PHP", "Green"}
         };
-        gm.createInitialBoard(jogadores, 10); // tabuleiro de 10 casas
+        gm.createInitialBoard(jogadores, 10);
 
-        // turno inicial deve ser 0
+        // turno inicial = 0
         assertEquals(0, gm.getBoard().getTurnos(), "O contador deve começar em 0.");
 
-        // jogador 1 move 3 casas → turno +1
+        // Jogador 1 move → +1 turno após reação
         gm.moveCurrentPlayer(3);
-        assertEquals(1, gm.getBoard().getTurnos(), "Após 1 movimento, deve haver 1 turno.");
+        gm.reactToAbyssOrTool();
+        assertEquals(1, gm.getBoard().getTurnos(), "Após 1 jogada completa, deve haver 1 turno.");
 
-        // jogador 2 move 2 casas → turno +1
+        // Jogador 2 move → +1 turno após reação
         gm.moveCurrentPlayer(2);
-        assertEquals(2, gm.getBoard().getTurnos(), "Após 2 movimentos, deve haver 2 turnos.");
+        gm.reactToAbyssOrTool();
+        assertEquals(2, gm.getBoard().getTurnos(), "Após 2 jogadas completas, deve haver 2 turnos.");
 
-        // jogador 1 move para a meta (posição final = 10)
-        gm.getBoard().getJogadores().get(1).setPosicao(9); // manualmente antes da jogada
-        gm.moveCurrentPlayer(1); // este movimento vence o jogo
+        // Jogador 1 chega à meta
+        gm.getBoard().getJogadores().get(1).setPosicao(9);
+        gm.moveCurrentPlayer(1);
+        gm.reactToAbyssOrTool();
 
-        // turno deve ser incrementado mesmo na jogada final
+        // turno deve ser incrementado na jogada final também
         assertEquals(3, gm.getBoard().getTurnos(), "A jogada vencedora também conta como turno.");
 
-        // o jogo deve ter terminado
+        // O jogo termina
         assertTrue(gm.gameIsOver(), "O jogo deve terminar quando o jogador chega à meta.");
     }
-
-    //PARTE 2
-
+    
     // TESTE da getProgrammersInfo
     @Test
     public void testGetProgrammersInfo_FormatacaoCorreta() {
