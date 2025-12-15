@@ -2,6 +2,8 @@ package pt.ulusofona.lp2.greatprogrammingjourney;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestGameManager {
@@ -966,6 +968,82 @@ public class TestGameManager {
         moved = manager.moveCurrentPlayer(7); // inválido (só 1–6)
         assertFalse(moved, "Movimento inválido não deve contar turno");
         assertEquals(3, manager.getBoard().getTurnos(), "Movimento inválido não deve incrementar turno");
+    }
+
+    @Test
+    public void test_getProgrammerInfo_basico() {
+        GameManager gm = new GameManager();
+
+        // Criar um jogador simples
+        String[][] jogadores = {
+                {"1", "Sara", "Java;Python", "Purple"},
+                {"2", "Sara", "Java;Python", "Purple"}
+        };
+
+        // criar o tabuleiro (sem abismos nem ferramentas)
+        gm.createInitialBoard(jogadores, 10);
+
+        // Obter a info do jogador (array)
+        String[] info = gm.getProgrammerInfo(1);
+
+        // Mostrar no terminal
+        System.out.println("Array devolvido: " + Arrays.toString(info));
+
+        // Verificar campos básicos
+        assertNotNull(info);
+        assertEquals("1", info[0]);            // ID
+        assertEquals("Sara", info[1]);         // Nome
+        assertTrue(info[2].contains("Java"));  // Linguagens
+        assertEquals("Purple", info[3]);       // Cor
+        assertEquals("1", info[4]);            // Posição inicial
+    }
+
+    @Test
+    public void test_getProgrammerInfoAsStr_semFerramentas() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Sara", "C#;Python", "Blue"},
+                {"2", "Saras", "C#;Python", "Blue"}
+        };
+
+        gm.createInitialBoard(jogadores, 10);
+
+        // Obter a info formatada como string
+        String info = gm.getProgrammerInfoAsStr(1);
+        System.out.println("Info formatada: " + info);
+
+        // Estrutura esperada:
+        // ID | Nome | Posição | Ferramentas | Linguagens | Estado
+        assertTrue(info.contains("1 | Sara"));
+        assertTrue(info.contains("No tools"));
+        assertTrue(info.contains("C#"));
+        assertTrue(info.contains("Python"));
+        assertTrue(info.contains("Em Jogo"));
+    }
+
+
+    @Test
+    public void test_getProgrammerInfoAsStr_comLinguagensOrdenadas() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Núria", "Python;C;Java", "Purple"},
+                {"2", "Núria", "Python;C;Java", "Purple"}
+        };
+
+        gm.createInitialBoard(jogadores, 8);
+
+        String info = gm.getProgrammerInfoAsStr(1);
+        System.out.println("Info ordenada: " + info);
+
+        // As linguagens devem aparecer ordenadas alfabeticamente (C; Java; Python)
+        int idxC = info.indexOf("C");
+        int idxJava = info.indexOf("Java");
+        int idxPython = info.indexOf("Python");
+
+        assertTrue(idxC < idxJava);
+        assertTrue(idxJava < idxPython);
     }
 
 }

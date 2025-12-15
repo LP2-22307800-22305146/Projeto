@@ -279,7 +279,7 @@ public class GameManager {
         }
 
         Player p = board.getJogadores().get(id);
-        String[] info = new String[5];
+        String[] info = new String[7];
 
         info[0] = String.valueOf(p.getId());               // ID
         info[1] = p.getNome();                             // Nome
@@ -287,6 +287,25 @@ public class GameManager {
         info[3] = p.getCor();
         info[4] = String.valueOf(p.getPosicao());          // Posição atual
 
+        //ferramentas
+        if (p.getFerramentas() != null && !p.getFerramentas().isEmpty()) {
+            ArrayList<String> nomesFerramentas = new ArrayList<>();
+            for (Ferramenta f : p.getFerramentas()) {
+                nomesFerramentas.add(f.getNome());
+            }
+            info[5] = String.join(";", nomesFerramentas);
+        } else {
+            info[5] = "No tools";
+        }
+
+        //estado do jogador
+        if (p.isDerrotado()) {
+            info[6] = "Derrotado";
+        } else if (p.isPreso()) {
+            info[6] = "Preso";
+        } else {
+            info[6] = "Em Jogo";
+        }
         return info;
     }
 
@@ -318,7 +337,14 @@ public class GameManager {
         String linguagensStr = String.join("; ", linguagensOrdenadas);
 
         // determinar estado
-        String estado = p.isDerrotado() ? "Derrotado" : "Em Jogo";
+        String estado;
+        if (p.isDerrotado()) {
+            estado = "Derrotado";
+        } else if (p.isPreso()) {
+            estado = "Preso";
+        } else {
+            estado = "Em Jogo";
+        }
 
         // construir string final
         return p.getId() + " | " + p.getNome() + " | " +
