@@ -3,6 +3,7 @@ package pt.ulusofona.lp2.greatprogrammingjourney;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class GameManager {
@@ -735,7 +736,13 @@ public class GameManager {
         restantes.remove(vencedor);
 
         //ordena por posição (maior → mais próximo da meta)
-        restantes.sort((p1, p2) -> Integer.compare(p2.getPosicao(), p1.getPosicao()));
+        restantes.sort((p1, p2) -> {
+            int cmp = Integer.compare(p2.getPosicao(), p1.getPosicao());
+            if (cmp == 0) {
+                return p1.getNome().compareToIgnoreCase(p2.getNome()); // ordem alfabética se empatados
+            }
+            return cmp;
+        });
 
         for (Player p : restantes) {
             resultados.add(p.getNome() + " " + p.getPosicao());
@@ -745,14 +752,157 @@ public class GameManager {
     }
 
     public void loadGame(File file) throws InvalidFileException, FileNotFoundException {
+        if (!file.exists()) {
+            throw new FileNotFoundException("Ficheiro não encontrado: " + file.getName());
+        }
 
+        try (Scanner sc = new Scanner(file)) {
+
+            // recriar board vazio
+            board = new Board();
+
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine().trim();
+
+                if (line.startsWith("BOARD_SIZE=")) {
+                    board.setTamanho(Integer.parseInt(line.split("=")[1]));
+
+                } else if (line.startsWith("TURN=")) {
+                    board.setTurnos(Integer.parseInt(line.split("=")[1]));
+
+                } else if (line.startsWith("CURRENT_PLAYER=")) {
+                    board.setCurrentPlayerID(Integer.parseInt(line.split("=")[1]));
+
+                } else if (line.equals("[PLAYERS]")) {
+                    while (sc.hasNextLine()) {
+                        line = sc.nextLine().trim();
+                        if (line.isEmpty() || line.startsWith("[")) break;
+
+                        String[] p = line.split(";");
+                        Player jogador = new Player(Integer.parseInt(p[0]), p[1], p[2]);
+
+                        // linguagens
+                        if (!p[3].isEmpty()) {
+                            for (String l : p[3].split(",")) {
+                                jogador.adicionarLinguagem(l);
+                            }
+                        }
+
+                        // ferramentas
+                        if (!p[4].isEmpty()) {
+                            for (String fNome : p[4].split(",")) {
+                                Ferramenta f = new Ferramenta(0, fNome);
+                                jogador.adicionarFerramenta(f);
+                            }
+                        }
+
+                        jogador.setPosicao(Integer.parseInt(p[5]));
+                        if (p[6].equals("DERROTADO")) jogador.setDerrotado(true);
+
+                        board.getJogadores().put(jogador.getId(), jogador);
+
+                        if (line.startsWith("[")) break;
+                    }
+                }
+
+                // Abismos
+                else if (line.equals("[ABISMS]")) {
+                    while (sc.hasNextLine()) {
+                        line = sc.nextLine().trim();
+                        if (line.isEmpty() || line.startsWith("[")) break;
+
+                        String[] a = line.split(";");
+                        int id = Integer.parseInt(a[0]);
+                        int pos = Integer.parseInt(a[1]);
+                        board.getAbismos().put(pos, new Abismo(id, pos));
+                    }
+                }
+
+                // Ferramentas
+                else if (line.equals("[TOOLS]")) {
+                    while (sc.hasNextLine()) {
+                        line = sc.nextLine().trim();
+                        if (line.isEmpty() || line.startsWith("[")) break;
+
+                        String[] f = line.split(";");
+                        int id = Integer.parseInt(f[0]);
+                        int pos = Integer.parseInt(f[1]);
+
+                        String nome = switch (id) {
+                            case 0 -> "Herança";
+                            case 1 -> "Programação Funcional";
+                            case 2 -> "Testes Unitários";
+                            case 3 -> "Tratamento de Excepções";
+                            case 4 -> "IDE";
+                            case 5 -> "Ajuda Do Professor";
+                            default -> "Ferramenta Desconhecida";
+                        };
+
+                        board.getFerramentas().put(pos, new Ferramenta(id, nome));
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InvalidFileException("Erro a carregar o jogo: " + e.getMessage());
+        }
     }
+
 
     public boolean saveGame(File file) {
+        try {
+            PrintWriter pw = new PrintWriter(file);
 
-        return true;
+            // Cabeçalho
+            pw.println("BOARD_SIZE=" + board.getTamanho());
+            pw.println("TURN=" + board.getTurnos());
+            pw.println("CURRENT_PLAYER=" + board.getCurrentPlayerID());
 
+            // --- Guardar jogadores ---
+            pw.println("[PLAYERS]");
+            for (Player p : board.getJogadores().values()) {
+                pw.print(p.getId() + ";" + p.getNome() + ";" + p.getCor() + ";");
+
+                // linguagens
+                pw.print(String.join(",", p.getLinguagensFavoritas()) + ";");
+
+                // ferramentas
+                ArrayList<String> nomesFerramentas = new ArrayList<>();
+                for (Ferramenta f : p.getFerramentas()) {
+                    nomesFerramentas.add(f.getNome());
+                }
+                pw.print(String.join(",", nomesFerramentas) + ";");
+
+                // posição e estado
+                pw.print(p.getPosicao() + ";");
+                pw.print(p.isDerrotado() ? "DERROTADO" : "EM_JOGO");
+                pw.println();
+            }
+
+            // --- Guardar abismos ---
+            pw.println("[ABISMS]");
+            for (Map.Entry<Integer, Abismo> e : board.getAbismos().entrySet()) {
+                Abismo a = e.getValue();
+                pw.println(a.getId() + ";" + e.getKey());
+            }
+
+            // --- Guardar ferramentas ---
+            pw.println("[TOOLS]");
+            for (Map.Entry<Integer, Ferramenta> e : board.getFerramentas().entrySet()) {
+                Ferramenta f = e.getValue();
+                pw.println(f.getId() + ";" + e.getKey());
+            }
+
+            pw.close();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+
 
     public JPanel getAuthorsPanel(){
         //painel
