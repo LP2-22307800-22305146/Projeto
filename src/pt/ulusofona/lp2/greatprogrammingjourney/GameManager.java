@@ -415,7 +415,7 @@ public class GameManager {
         }
 
         // verificar ferramentas (só se não houver abismo)
-        if (board.getFerramentas().containsKey(position)) {
+        else if (board.getFerramentas().containsKey(position)) {
             Ferramenta f = board.getFerramentas().get(position);
             descricao = f.getNome();
             tipoEId = "T:" + f.getId();
@@ -463,7 +463,6 @@ public class GameManager {
     }
 
     public boolean moveCurrentPlayer(int nrSpaces) {
-
         // valida se o valor do dado é entre 1 e 6
         if (nrSpaces < 1 || nrSpaces > 6) {
             return false;
@@ -472,7 +471,6 @@ public class GameManager {
         // guardar o valor do dado para uso posterior em abismos (ex: Erro de Lógica)
         board.setUltimoValorDado(nrSpaces);
 
-        // obter o jogo atual
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
@@ -482,29 +480,10 @@ public class GameManager {
         }
 
         // atualizar histórico antes de alterar a posição
-        //jogadorAtual.atualizarHistorico();
-
-        //int tamanho = board.getTamanho();
-        //int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
-
-        // verifica as restrições por linguagem
-        if (!jogadorAtual.getLinguagensFavoritas().isEmpty()) {
-            String primeiraLing = jogadorAtual.getLinguagensFavoritas().get(0);
-
-            if (primeiraLing.equalsIgnoreCase("Assembly") && nrSpaces > 2) {
-                return false;
-            }
-            if (primeiraLing.equalsIgnoreCase("C") && nrSpaces > 3) {
-                return false;
-            }
-        }
-
-        // atualizar histórico antes de mover (para abismos 5 e 6)
         jogadorAtual.atualizarHistorico();
 
-        // calcular nova posição
-        int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
         int tamanho = board.getTamanho();
+        int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
 
         // se ultrapassar o final do tabuleiro, faz ricochete
         if (novaPosicao > tamanho) {
@@ -515,7 +494,6 @@ public class GameManager {
         // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
 
-        /*
         // incrementar o número total de turnos
         board.setTurnos(board.getTurnos() + 1);
 
@@ -530,15 +508,13 @@ public class GameManager {
         int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
         board.setCurrentPlayerID(proximo);
 
-         */
-
         return true;
     }
 
 
     public String reactToAbyssOrTool() {
 
-        // Lista ordenada dos IDs dos jogadores
+        // Lista dos IDs dos jogadores
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
@@ -554,27 +530,21 @@ public class GameManager {
             idParaReagir = (indexAtual == 0) ? ids.get(ids.size() - 1) : ids.get(indexAtual - 1);
         }
 
+        // para saber onde está o joador
         Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
-        String mensagem = null;
 
         // verificar se há uma ferramenta na casa atual
         if (board.getFerramentas().containsKey(posicao)) {
-
             Ferramenta f = board.getFerramentas().get(posicao);
-
-            // Jogador recolhe a ferramenta se ainda não a tiver
-            if (!jogador.temFerramenta(f)) {
-
+            if (!jogador.temFerramenta(f)) { // o jogador não tem ferramenta
                 jogador.adicionarFerramenta(f);
                 board.getFerramentas().remove(posicao);
-                //board.setTurnos(board.getTurnos() + 1);
-                mensagem = jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
-
+                board.setTurnos(board.getTurnos() + 1);
+                return jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
             } else {
-
-                mensagem = jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
-
+                board.setTurnos(board.getTurnos() + 1);
+                return jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
             }
         }
 
@@ -583,16 +553,14 @@ public class GameManager {
             Abismo a = board.getAbismos().get(posicao);
 
             // se o jogador tiver ferramenta, o abismo é anulado
-            if (jogador.temFerramentaQueAnula(a)) {
+            if (jogador.temFerramentaQueAnula(a)) { // o id da ferramenta é igual ao id do abismo
                 jogador.usarFerramentaContra(a);
                 board.setTurnos(board.getTurnos() + 1);
-
-                return (mensagem != null ? mensagem + " " : "")
-                        + jogador.getNome() + " evitou o abismo " + a.getNome() + "!";            }
+                return jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
+            }
 
             int novaPos = jogador.getPosicao();
 
-            // aplicar efeito do abismo
             switch (a.getId()) {
                 case 0:
                     // Erro de Sintaxe → recua 1 casa
@@ -635,16 +603,14 @@ public class GameManager {
                     // Blue Screen of Death → o jogador é derrotado
                     jogador.setDerrotado(true);
                     board.setTurnos(board.getTurnos() + 1);
+                    return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
 
-                    return (mensagem != null ? mensagem + " " : "")
-                            + jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
                 case 8:
                     // Ciclo Infinito → o jogador fica preso, mas o jogo continua
                     jogador.setPreso(true);
                     board.setTurnos(board.getTurnos() + 1);
+                    return jogador.getNome() + " ficou preso num ciclo infinito!";
 
-                    return (mensagem != null ? mensagem + " " : "")
-                            + jogador.getNome() + " ficou preso num ciclo infinito!";
                 case 9:
                     // Segmentation Fault → todos os jogadores na mesma casa recuam 3 casas,
                     // apenas se houver dois ou mais jogadores nessa posição
@@ -664,16 +630,17 @@ public class GameManager {
             // atualizar posição e turno
             jogador.setPosicao(novaPos);
             board.setTurnos(board.getTurnos() + 1);
-
-            return (mensagem != null ? mensagem + " " : "")
-                    + jogador.getNome() + " caiu no abismo " + a.getNome()
-                    + " e foi parar à casa " + novaPos + "!";
+            return jogador.getNome() + " caiu no abismo " + a.getNome() + " e foi parar à casa " + novaPos + "!";
         }
 
         // casa vazia, apenas incrementa turno
         board.setTurnos(board.getTurnos() + 1);
-        return mensagem;
+        return null;
     }
+
+
+
+
 
 
     public boolean gameIsOver() {
