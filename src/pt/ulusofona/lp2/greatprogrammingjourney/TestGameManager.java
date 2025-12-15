@@ -927,7 +927,46 @@ public class TestGameManager {
         }
     }
 
+    @Test
+    public void testTurnosIncrementaCorretamente() {
+        // --- Setup inicial ---
+        GameManager manager = new GameManager();
+
+        // Cria dois jogadores válidos
+        String[][] jogadores = {
+                {"1", "Alice", "Java;Python", "Blue"},
+                {"2", "Bob", "C;C++", "Green"}
+        };
+
+        // Cria tabuleiro de 10 casas sem abismos nem ferramentas
+        boolean criado = manager.createInitialBoard(jogadores, 10);
+        assertTrue(criado, "Falha ao criar tabuleiro inicial");
+
+        // O contador de turnos deve começar a 0
+        assertEquals(0, manager.getBoard().getTurnos(), "O contador de turnos deve começar a 0");
+
+        // --- 1ª jogada ---
+        boolean moved = manager.moveCurrentPlayer(3);
+        manager.reactToAbyssOrTool();
+        assertTrue(moved, "O jogador devia conseguir mover-se");
+        assertEquals(1, manager.getBoard().getTurnos(), "Após 1 jogada válida deve haver 1 turno");
+
+        // --- 2ª jogada ---
+        moved = manager.moveCurrentPlayer(4);
+        manager.reactToAbyssOrTool();
+        assertTrue(moved, "O jogador devia conseguir mover-se novamente");
+        assertEquals(2, manager.getBoard().getTurnos(), "Após 2 jogadas válidas deve haver 2 turnos");
+
+        // --- 3ª jogada ---
+        moved = manager.moveCurrentPlayer(2);
+        manager.reactToAbyssOrTool();
+        assertEquals(3, manager.getBoard().getTurnos(), "Após 3 jogadas válidas deve haver 3 turnos");
+
+        // --- Movimento inválido ---
+        moved = manager.moveCurrentPlayer(7); // inválido (só 1–6)
+        assertFalse(moved, "Movimento inválido não deve contar turno");
+        assertEquals(3, manager.getBoard().getTurnos(), "Movimento inválido não deve incrementar turno");
+    }
 
 }
-
 

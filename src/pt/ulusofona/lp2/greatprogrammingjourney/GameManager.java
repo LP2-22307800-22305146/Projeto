@@ -494,8 +494,6 @@ public class GameManager {
         // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
 
-        // incrementar o número total de turnos
-        board.setTurnos(board.getTurnos() + 1);
 
         // se o jogador chegou ao fim, o jogo termina
         if (novaPosicao == tamanho) {
