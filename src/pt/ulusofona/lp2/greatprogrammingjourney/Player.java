@@ -96,28 +96,44 @@ public class Player {
         for (Ferramenta f : ferramentas) {
             switch (a.getId()) {
                 case 0 -> { // Erro de Sintaxe ← IDE
-                    if (f.getId() == 4) return true;
+                    if (f.getId() == 4){
+                        return true;
+                    }
                 }
                 case 1 -> { // Erro de Lógica ← Testes Unitários
-                    if (f.getId() == 2) return true;
+                    if (f.getId() == 2){
+                        return true;
+                    }
                 }
                 case 2 -> { // Exception ← Tratamento de Exceções
-                    if (f.getId() == 3) return true;
+                    if (f.getId() == 3) {
+                        return true;
+                    }
                 }
                 case 3 -> { // FileNotFoundException ← Ajuda do Professor
-                    if (f.getId() == 5) return true;
+                    if (f.getId() == 5) {
+                        return true;
+                    }
                 }
                 case 4 -> { // Crash ← Ajuda do Professor
-                    if (f.getId() == 5) return true;
+                    if (f.getId() == 5) {
+                        return true;
+                    }
                 }
                 case 5 -> { // Código Duplicado ← Herança
-                    if (f.getId() == 0) return true;
+                    if (f.getId() == 0) {
+                        return true;
+                    }
                 }
                 case 6 -> { // Efeitos Secundários ← Programação Funcional
-                    if (f.getId() == 1) return true;
+                    if (f.getId() == 1) {
+                        return true;
+                    }
                 }
                 case 8 -> { // Ciclo Infinito ← Ajuda do Professor
-                    if (f.getId() == 5) return true;
+                    if (f.getId() == 5) {
+                        return true;
+                    }
                 }
             }
         }

@@ -490,51 +490,41 @@ public class GameManager {
     }
 
     public boolean moveCurrentPlayer(int nrSpaces) {
-        // valida se o valor do dado é entre 1 e 6
-        if (nrSpaces < 1 || nrSpaces > 6) {
-            return false;
-        }
+        // valida o valor do dado
+        if (nrSpaces < 1 || nrSpaces > 6) return false;
 
-        // guardar o valor do dado para uso posterior em abismos (ex: Erro de Lógica)
+        // guarda o valor do dado
         board.setUltimoValorDado(nrSpaces);
 
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
-        // verificar se o jogador existe e está ativo
+        // valida o jogador
         if (jogadorAtual == null || jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
             return false;
         }
 
-        // atualizar histórico antes de alterar a posição
+        // atualiza histórico
         jogadorAtual.atualizarHistorico();
 
         int tamanho = board.getTamanho();
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
 
-        // se ultrapassar o final do tabuleiro, faz ricochete
+        // ricochete no fim
         if (novaPosicao > tamanho) {
             int excesso = novaPosicao - tamanho;
             novaPosicao = tamanho - excesso;
         }
 
-        // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
 
-
-        // se o jogador chegou ao fim, o jogo termina
-        if (novaPosicao == tamanho) {
-            return true;
-        }
-
-        // passar o turno para o próximo jogador
-        ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
-        idsOrdenados.sort(Integer::compareTo);
-        int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
-        board.setCurrentPlayerID(proximo);
+        // ⚠️ NÃO muda o currentPlayerID aqui!
+        // ⚠️ NÃO incrementa turnos aqui!
+        // isso é feito em reactToAbyssOrTool()
 
         return true;
     }
+
 
 
     public String reactToAbyssOrTool() {

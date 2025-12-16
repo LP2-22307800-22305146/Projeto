@@ -1040,6 +1040,51 @@ public class TestGameManager {
         assertTrue(idxC < idxJava);
         assertTrue(idxJava < idxPython);
     }
+    @Test
+    public void test_Debug_PlayerPositionAndObjects() {
+        GameManager gm = new GameManager();
+
+        // Dois jogadores, porque o jogo exige mínimo 2
+        String[][] jogadores = {
+                {"1", "Sara", "Java;C#", "Purple"},
+                {"2", "João", "Python", "Green"}
+        };
+
+        // Casa 9 → Ferramenta 0 (Herança)
+        // Casa 10 → Abismo 0 (Erro de Sintaxe)
+        String[][] objetos = {
+                {"1", "0", "9"},
+                {"0", "0", "10"}
+        };
+
+        // Criar tabuleiro de 12 casas
+        gm.createInitialBoard(jogadores, 12, objetos);
+
+        // --- Movimento ---
+        gm.moveCurrentPlayer(6);  // Sara anda 6 casas → posição 7
+        gm.reactToAbyssOrTool();  // Casa vazia
+        gm.moveCurrentPlayer(2);  // Sara vai para posição 9 (ferramenta)
+        gm.reactToAbyssOrTool();  // apanha ferramenta Herança
+        gm.moveCurrentPlayer(1);  // vai para casa 10 (abismo)
+
+        // --- Diagnóstico ---
+        Player jogador = gm.getBoard().getJogadores().get(1);  // Sara
+        int pos = jogador.getPosicao();
+
+        System.out.println("\n=== DEBUG TEST ===");
+        System.out.println("Jogador atual: " + gm.getBoard().getCurrentPlayerID());
+        System.out.println("Jogador Sara posição: " + pos);
+        System.out.println("Abismos no tabuleiro: " + gm.getBoard().getAbismos().keySet());
+        System.out.println("Ferramentas no tabuleiro: " + gm.getBoard().getFerramentas().keySet());
+
+        // Agora chamar reactToAbyssOrTool e ver se reage
+        String msg = gm.reactToAbyssOrTool();
+        System.out.println("Mensagem devolvida: " + msg);
+
+        // Verificações
+        assertNotNull(jogador);
+        assertTrue(pos >= 1 && pos <= 12, "Posição inválida: " + pos);
+    }
 
 }
 
