@@ -207,12 +207,12 @@ public class GameManager {
                     }
 
                     // Verificar tipo
-                    if (tipo == 1) {
+                    if (tipo == 0) {
                         if (id < 0 || id > 9) {
                             return false;
                         }
                         board.getAbismos().put(posicao, new Abismo(id, posicao));
-                    } else if (tipo == 0) {
+                    } else if (tipo == 1) {
                         if (id < 0 || id > 5) {
                             return false;
                         }
