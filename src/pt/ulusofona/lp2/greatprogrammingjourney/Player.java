@@ -93,24 +93,55 @@ public class Player {
     //verifica se o jogador tem uma ferramenta que anula o abismo
     // (por agora simplificamos: qualquer ferramenta pode anular um abismo)
     public boolean temFerramentaQueAnula(Abismo a) {
-        int aid = a.getId();
         for (Ferramenta f : ferramentas) {
-            int fid = f.getId();
-            if ((aid == 0 && (fid == 4 || fid == 5))  // Erro de Sintaxe → IDE ou Ajuda do Professor
-                    || (aid == 1 && fid == 1)             // Erro de Lógica → Programação Funcional
-                    || (aid == 2 && fid == 2)             // Exception → Testes Unitários
-                    || (aid == 3 && fid == 3)             // FileNotFoundException → Tratamento de Excepções
-                    || (aid == 4 && fid == 4)             // Crash → IDE
-                    || (aid == 5 && fid == 5)) {          // Código Duplicado → Ajuda do Professor
-                return true;
+            switch (a.getId()) {
+                case 0 -> { // Erro de Sintaxe ← IDE
+                    if (f.getId() == 4) return true;
+                }
+                case 1 -> { // Erro de Lógica ← Testes Unitários
+                    if (f.getId() == 2) return true;
+                }
+                case 2 -> { // Exception ← Tratamento de Exceções
+                    if (f.getId() == 3) return true;
+                }
+                case 3 -> { // FileNotFoundException ← Ajuda do Professor
+                    if (f.getId() == 5) return true;
+                }
+                case 4 -> { // Crash ← Ajuda do Professor
+                    if (f.getId() == 5) return true;
+                }
+                case 5 -> { // Código Duplicado ← Herança
+                    if (f.getId() == 0) return true;
+                }
+                case 6 -> { // Efeitos Secundários ← Programação Funcional
+                    if (f.getId() == 1) return true;
+                }
+                case 8 -> { // Ciclo Infinito ← Ajuda do Professor
+                    if (f.getId() == 5) return true;
+                }
             }
         }
         return false;
     }
 
-    //(remove) uma ferramenta para anular um abismo
+
+
     public void usarFerramentaContra(Abismo a) {
-        ferramentas.removeIf(f -> f.getId() == a.getId());
+        int ferramentaParaRemover = -1;
+
+        switch (a.getId()) {
+            case 0 -> ferramentaParaRemover = 4; // Erro de Sintaxe ← IDE
+            case 1 -> ferramentaParaRemover = 2; // Erro de Lógica ← Testes Unitários
+            case 2 -> ferramentaParaRemover = 3; // Exception ← Tratamento de Exceções
+            case 3 -> ferramentaParaRemover = 5; // FileNotFoundException ← Ajuda do Professor
+            case 4 -> ferramentaParaRemover = 5; // Crash ← Ajuda do Professor
+            case 5 -> ferramentaParaRemover = 0; // Código Duplicado ← Herança
+            case 6 -> ferramentaParaRemover = 1; // Efeitos Secundários ← Programação Funcional
+            case 8 -> ferramentaParaRemover = 5; // Ciclo Infinito ← Ajuda do Professor
+        }
+
+        int finalFerramentaParaRemover = ferramentaParaRemover;
+        ferramentas.removeIf(f -> f.getId() == finalFerramentaParaRemover);
     }
 
 
