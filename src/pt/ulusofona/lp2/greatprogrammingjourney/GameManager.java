@@ -490,41 +490,61 @@ public class GameManager {
     }
 
     public boolean moveCurrentPlayer(int nrSpaces) {
-        // valida o valor do dado
-        if (nrSpaces < 1 || nrSpaces > 6) return false;
+        // valida se o valor do dado é entre 1 e 6
+        if (nrSpaces < 1 || nrSpaces > 6) {
+            return false;
+        }
 
-        // guarda o valor do dado
+        // guardar o valor do dado para uso posterior em abismos (ex: Erro de Lógica)
         board.setUltimoValorDado(nrSpaces);
 
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
-        // valida o jogador
+        // verificar se o jogador existe e está ativo
         if (jogadorAtual == null || jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
             return false;
         }
 
-        // atualiza histórico
+        // Restrição de Linguagem
+        String primeiraLinguagem = jogadorAtual.primeiraLinguagem();
+
+        // Verificar que tipo de linguagem é e aplica a restrição
+        if (primeiraLinguagem.equals("Assembly") && nrSpaces >= 3) {
+            return false;
+        } else if (primeiraLinguagem.equals("C") && nrSpaces >= 4) {
+            return false;
+        }
+
+        // atualizar histórico antes de alterar a posição
         jogadorAtual.atualizarHistorico();
 
         int tamanho = board.getTamanho();
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
 
-        // ricochete no fim
+        // se ultrapassar o final do tabuleiro, faz ricochete
         if (novaPosicao > tamanho) {
             int excesso = novaPosicao - tamanho;
             novaPosicao = tamanho - excesso;
         }
 
+        // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
 
-        // ⚠️ NÃO muda o currentPlayerID aqui!
-        // ⚠️ NÃO incrementa turnos aqui!
-        // isso é feito em reactToAbyssOrTool()
+
+        // se o jogador chegou ao fim, o jogo termina
+        if (novaPosicao == tamanho) {
+            return true;
+        }
+
+        // passar o turno para o próximo jogador
+        ArrayList<Integer> idsOrdenados = new ArrayList<>(board.getJogadores().keySet());
+        idsOrdenados.sort(Integer::compareTo);
+        int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
+        board.setCurrentPlayerID(proximo);
 
         return true;
     }
-
 
 
     public String reactToAbyssOrTool() {
