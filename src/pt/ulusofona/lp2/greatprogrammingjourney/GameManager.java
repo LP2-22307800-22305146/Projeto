@@ -402,6 +402,7 @@ public class GameManager {
     }
 
     public String[] getSlotInfo(int position) {
+
         // posição fora do tabuleiro
         if (position < 1 || position > board.getTamanho()) {
             return null;
@@ -455,7 +456,6 @@ public class GameManager {
                 tipoEId
         };
     }
-
 
     public int getCurrentPlayerID() {
         //se o tabuleiro ainda não tem jogadores
@@ -546,7 +546,6 @@ public class GameManager {
         return true;
     }
 
-
     public String reactToAbyssOrTool() {
 
         // lista dos IDs dos jogadores
@@ -564,7 +563,7 @@ public class GameManager {
             idParaReagir = ids.get(indexAtual - 1);
         }
 
-        
+
         Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
 
@@ -671,12 +670,6 @@ public class GameManager {
         board.setTurnos(board.getTurnos() + 1);
         return null;
     }
-
-
-
-
-
-
 
     public boolean gameIsOver() {
         //se o tabuleiro não tem jogadores, o jogo não pode ter terminado
@@ -863,8 +856,6 @@ public class GameManager {
         }
     }
 
-
-
     public boolean saveGame(File file) {
         try {
             PrintWriter pw = new PrintWriter(file);
@@ -917,7 +908,6 @@ public class GameManager {
             return false;
         }
     }
-
 
     public JPanel getAuthorsPanel(){
         //painel

@@ -121,8 +121,8 @@ public class Player {
                         return true;
                     }
                 }
-                case 3 -> { // FileNotFoundException ← Ajuda do Professor
-                    if (f.getId() == 5) {
+                case 3 -> { // FileNotFoundException ← Ajuda do Professor e Tratamento de Exceções
+                    if (f.getId() == 5 || f.getId() == 3) {
                         return true;
                     }
                 }

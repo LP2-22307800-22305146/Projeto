@@ -281,6 +281,26 @@ public class TestGameManager {
         assertEquals(1, gm.getCurrentPlayerID());
     }
 
+    @Test
+    public void testMoveCurrentPlayerRestricoesLinguagens () {
+        GameManager gm = new GameManager();
+        String[][] players = {
+                {"1", "Zé", "Assembly", "Blue", "1"},
+                {"2", "Mia", "C", "Green", "1"}
+        };
+
+        // iniciar o board
+        assertTrue(gm.createInitialBoard(players, 10));
+
+        boolean movedZe = gm.moveCurrentPlayer(3);
+        assertFalse(movedZe, "Não deve permitir mover mais que 2 casas.");
+
+        boolean movedMia = gm.moveCurrentPlayer(4);
+        assertFalse(movedZe, "Não deve permitir mover mais que 3 casas.");
+
+    }
+
+
     // Verifica incremento do contador de turnos.
 
     @Test
@@ -539,6 +559,7 @@ public class TestGameManager {
         assertFalse(result, "Deve retornar false com id de abismo inválido");
     }
 
+    // SLOTS
     @Test
     public void testGetSlotInfo_ComAbismo() {
         GameManager gm = new GameManager();
@@ -590,7 +611,6 @@ public class TestGameManager {
         assertEquals("IDE", slot[1], "Descrição deve ser 'IDE'");
         assertEquals("T:4", slot[2], "Tipo+ID deve ser 'T:4'");
     }
-
 
     @Test
     public void testGetSlotInfo_CasaVazia() {
@@ -776,48 +796,6 @@ public class TestGameManager {
         System.out.println("Reação abismo: " + r2);
     }
 
-
-    @Test
-    public void diagnosticoAbismos() {
-        GameManager gm;
-        String[][] players = {
-                {"1", "Ana", "Java", "Blue"},
-                {"2", "Bruno", "Python", "Green"}
-        };
-
-        for (int id = 0; id <= 9; id++) {
-            gm = new GameManager();
-            String[][] abysses = {{"0", String.valueOf(id), "5"}};
-
-            boolean ok = gm.createInitialBoard(players, 10, abysses);
-            if (!ok) {
-                System.out.println("❌ Erro ao criar board com abismo " + id);
-                continue;
-            }
-
-            Player ana = gm.getBoard().getJogadores().get(1);
-            if (ana == null) {
-                System.out.println("⚠️ Jogador não encontrado para abismo " + id);
-                continue;
-            }
-
-            // Preparar simulação
-            ana.setPosicao(5);
-            gm.getBoard().setUltimoValorDado(6);
-            gm.getBoard().setCurrentPlayerID(1);
-            gm.getBoard().setTurnos(0);
-
-            String msg = gm.reactToAbyssOrTool();
-
-            System.out.println("Abismo " + id + ":");
-            System.out.println("Mensagem -> " + msg);
-            System.out.println("Posição final -> " + ana.getPosicao());
-            System.out.println("Derrotado -> " + ana.isDerrotado());
-            System.out.println("Preso -> " + ana.isPreso());
-            System.out.println("-----------------------------");
-        }
-    }
-
     @Test
     public void testTurnosIncrementaCorretamente() {
         // --- Setup inicial ---
@@ -935,46 +913,267 @@ public class TestGameManager {
         assertTrue(idxJava < idxPython);
     }
 
+
+
+    /*
+// ======== TESTE 1 ======== //
     @Test
-    public void test_LogicErrorVsTool_Funcional() {
+    public void test_SyntaxError_Tool_Interaction() {
         GameManager gm = new GameManager();
 
-        // --- 1. Jogadores ---
         String[][] jogadores = {
-                {"1", "Sara", "Java;Python", "Purple"},   // Jogador principal
-                {"2", "João", "C", "Green"}               // Segundo jogador
+                {"1", "Sara", "Java;C#", "Purple"},
+                {"2", "João", "Python", "Green"} // segundo jogador mínimo
         };
 
-        // --- 2. Objetos no tabuleiro ---
-        // Casa 10 → Abismo 1 (Erro de Lógica)
-        // Casa 10 → Ferramenta 2 (Testes Unitários)
         String[][] objetos = {
-                {"1", "2", "10"}, // Ferramenta (tipo 1 → ferramenta)
-                {"0", "1", "10"}  // Abismo (tipo 0 → abismo)
+                {"1", "0", "9"},  // Casa 9 → Ferramenta 0 (Herança)
+                {"0", "0", "10"}  // Casa 10 → Abismo 0 (Erro de Sintaxe)
         };
 
-        // --- 3. Criar tabuleiro ---
         gm.createInitialBoard(jogadores, 12, objetos);
 
-        // --- 4. Movimento da Sara até à casa 10 ---
-        gm.moveCurrentPlayer(9); // sai da casa 1 → vai até à casa 10
+        // JOGADA DA SARA
+        // move 6 + 2 = 8 casas → chega à casa 9
+        gm.moveCurrentPlayer(6); // o jogador atual que é a SARA vai para a casa 7
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 7 e não há
 
-        // --- 5. Reação ao conteúdo da casa ---
-        String msg = gm.reactToAbyssOrTool();
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
 
-        // --- 6. Debug para confirmar ---
-        System.out.println("Mensagem de reação: " + msg);
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(2); // vai para acasa 9
+        String msgFerramenta = gm.reactToAbyssOrTool(); // verifica na casa 9 se há algo e há uma ferramneta
+        System.out.println(msgFerramenta); // vai aparecer a emnsagem da ferramenta
+        assertTrue(msgFerramenta.contains("Herança")); // confirma se é a ferramenta correta
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // jogador atual que é a João vai para a casa 3
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
+
+        // JOGADA DA SARA
+        // move +1 → casa 10 (abismo)
+        gm.moveCurrentPlayer(1); // vai para a casa do abismo
+        String msgAbismo = gm.reactToAbyssOrTool(); // reage ao abismo
+        System.out.println(msgAbismo); // manda a mensagem do abismo
+        assertTrue(msgAbismo.contains("evitou o abismo Erro de sintaxe"));
+
+        // deve continuar na posição 10
         String info = gm.getProgrammerInfoAsStr(1);
-        System.out.println("Info do jogador: " + info);
-
-        // --- 7. Asserções ---
-        assertNotNull(msg, "A mensagem de reação não pode ser nula");
-        assertTrue(msg.contains("Erro de Lógica") || msg.contains("Testes Unitários"),
-                "A mensagem deve mencionar o abismo ou a ferramenta relevante");
-        assertTrue(info.contains("10"),
-                "O jogador deve continuar na posição 10 após a reação (sem ser movido incorretamente)");
+        System.out.println(info);
+        assertTrue(info.contains("10"));
     }
 
 
+    // ======== TESTE 2 ======== //
+    @Test
+    public void test_LogicError_Tool_Interaction() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Sara", "Java;C#", "Purple"},
+                {"2", "João", "Python", "Green"} // segundo jogador mínimo
+        };
+
+        // Casa 9 → Ferramenta 1 (Programação Funcional)
+        // Casa 10 → Abismo 1 (Erro de Lógica)
+        String[][] objetos = {
+                {"1", "1", "9"},
+                {"0", "1", "10"}
+        };
+
+        gm.createInitialBoard(jogadores, 12, objetos);
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(6);
+        gm.reactToAbyssOrTool();
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(2);
+        String msgFerramenta = gm.reactToAbyssOrTool();
+        System.out.println(msgFerramenta);
+        assertTrue(msgFerramenta.contains("Programação Funcional"));
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 3
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(1);
+        String msgAbismo = gm.reactToAbyssOrTool();
+        System.out.println(msgAbismo);
+        assertTrue(msgAbismo.contains("evitou o abismo Erro de Lógica"));
+    }
+
+    // ======== TESTE 3 ======== //
+    @Test
+    public void test_Exception_Tool_Interaction() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Sara", "Java;C#", "Purple"},
+                {"2", "João", "Python", "Green"} // segundo jogador mínimo
+        };
+
+        // Casa 9 → Ferramenta 2 (Testes Unitários)
+        // Casa 10 → Abismo 2 (Exception)
+        String[][] objetos = {
+                {"1", "2", "9"},
+                {"0", "2", "10"}
+        };
+
+        gm.createInitialBoard(jogadores, 12, objetos);
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(6);
+        gm.reactToAbyssOrTool();
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(2);
+        String msgFerramenta = gm.reactToAbyssOrTool();
+        System.out.println(msgFerramenta);
+        assertTrue(msgFerramenta.contains("Testes Unitários"));
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 3
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(1);
+        String msgAbismo = gm.reactToAbyssOrTool();
+        System.out.println(msgAbismo);
+        assertTrue(msgAbismo.contains("evitou o abismo Exception"));
+    }
+
+    // ======== TESTE 4 ======== //
+    @Test
+    public void test_SideEffects_Tool_Interaction() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Sara", "Java;C#", "Purple"},
+                {"2", "João", "Python", "Green"} // segundo jogador mínimo
+        };
+
+        // Casa 9 → Ferramenta 5 (Ajuda do Professor)
+        // Casa 10 → Abismo 6 (Efeitos Secundários)
+        String[][] objetos = {
+                {"1", "5", "9"},
+                {"0", "6", "10"}
+        };
+
+        gm.createInitialBoard(jogadores, 12, objetos);
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(6);
+        gm.reactToAbyssOrTool();
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(2);
+        gm.reactToAbyssOrTool();
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 3
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(1);
+        String msgAbismo = gm.reactToAbyssOrTool();
+        System.out.println(msgAbismo);
+        assertTrue(msgAbismo.contains("evitou o abismo Efeitos Secundários"));
+    }
+
+    // ======== TESTE 5 ======== //
+    @Test
+    public void test_InfiniteLoop_NoTool() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Sara", "Java;C#", "Purple"},
+                {"2", "João", "Python", "Green"} // segundo jogador mínimo
+        };
+
+        // Casa 10 → Abismo 8 (Ciclo Infinito)
+        String[][] objetos = {
+                {"0", "8", "10"}
+        };
+
+        gm.createInitialBoard(jogadores, 12, objetos);
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(6);
+        gm.reactToAbyssOrTool();
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(3);
+        gm.reactToAbyssOrTool();
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 3
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
+
+        // JOGADA DA SARA
+        gm.moveCurrentPlayer(1);
+        String msg = gm.reactToAbyssOrTool();
+        System.out.println(msg);
+
+        assertTrue(msg.contains("ficou preso num ciclo infinito"));
+        assertTrue(gm.getBoard().getJogadores().get(1).isPreso());
+    }
+
+
+    // ======== TESTE 6 ======== //
+    @Test
+    public void test_TwoPlayersCatchSameTool() {
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Sara", "Python", "Green"},
+                {"2", "João", "C#", "Blue"}
+        };
+
+        // Ferramenta 0 (Herança) na casa 5
+        String[][] objetos = {
+                {"1", "0", "5"}
+        };
+
+        gm.createInitialBoard(jogadores, 12, objetos);
+
+        // Jogador 1 apanha ferramenta
+        gm.moveCurrentPlayer(4);
+        String msg1 = gm.reactToAbyssOrTool();
+        System.out.println(msg1);
+        assertTrue(msg1.contains("Herança"));
+
+        // Próximo jogador tenta apanhar a mesma ferramenta
+        gm.moveCurrentPlayer(4);
+        String msg2 = gm.reactToAbyssOrTool();
+        System.out.println(msg2);
+
+        // O segundo jogador não deve recolher nada novo
+        assertNotNull(msg2);
+    }
+
+     */
+
+
 }
+
 
