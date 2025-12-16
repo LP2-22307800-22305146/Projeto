@@ -46,16 +46,16 @@ public class Board {
         return ferramentas;
     }
 
+    public boolean getEsperaReacao () {
+        return esperaReacao;
+    }
+
     public int getUltimoValorDado() {
         return ultimoValorDado;
     }
 
     public int getCurrentPlayerID() {
         return currentPlayerID;
-    }
-
-    public boolean getEsperaReacao () {
-        return esperaReacao;
     }
 
     // Setters
@@ -76,15 +76,13 @@ public class Board {
         this.ultimoValorDado = valor;
     }
 
-    public void setEsperaReacao (boolean esperaReacao) {
-        this.esperaReacao = esperaReacao;
+    public void setEsperaReacao (boolean reacao) {
+        esperaReacao = reacao;
     }
-
 
     // MÉTODOS
 
-    public void proximoJogador() {
-
+    public void avancaProximoJogador() {
         if (jogadores == null || jogadores.isEmpty()) {
             return;
         }
@@ -92,25 +90,17 @@ public class Board {
         ArrayList<Integer> ids = new ArrayList<>(jogadores.keySet());
         ids.sort(Integer::compareTo);
 
-        // se ainda não houver jogador atual definido
-        if (currentPlayerID <= 0 || !ids.contains(currentPlayerID)) {
+        int atual = currentPlayerID;
+
+        // segurança extra
+        if (!ids.contains(atual)) {
             currentPlayerID = ids.get(0);
             return;
         }
 
-        int indexAtual = ids.indexOf(currentPlayerID);
-        int proximo = ids.get((indexAtual + 1) % ids.size());
-
+        int proximo = ids.get((ids.indexOf(atual) + 1) % ids.size());
         currentPlayerID = proximo;
     }
-
-
-    public void closeTurn() {
-        esperaReacao = false;
-        turnos++;
-        proximoJogador();
-    }
-
 
     public void printBoard() {
         System.out.println("=== Estado atual do tabuleiro ===");
