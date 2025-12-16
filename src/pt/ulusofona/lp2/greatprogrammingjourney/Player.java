@@ -93,8 +93,15 @@ public class Player {
     //verifica se o jogador tem uma ferramenta que anula o abismo
     // (por agora simplificamos: qualquer ferramenta pode anular um abismo)
     public boolean temFerramentaQueAnula(Abismo a) {
+        int aid = a.getId();
         for (Ferramenta f : ferramentas) {
-            if (f.getId() == a.getId()) {
+            int fid = f.getId();
+            if ((aid == 0 && (fid == 4 || fid == 5))  // Erro de Sintaxe → IDE ou Ajuda do Professor
+                    || (aid == 1 && fid == 1)             // Erro de Lógica → Programação Funcional
+                    || (aid == 2 && fid == 2)             // Exception → Testes Unitários
+                    || (aid == 3 && fid == 3)             // FileNotFoundException → Tratamento de Excepções
+                    || (aid == 4 && fid == 4)             // Crash → IDE
+                    || (aid == 5 && fid == 5)) {          // Código Duplicado → Ajuda do Professor
                 return true;
             }
         }

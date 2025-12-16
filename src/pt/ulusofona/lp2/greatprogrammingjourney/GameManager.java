@@ -539,7 +539,7 @@ public class GameManager {
 
     public String reactToAbyssOrTool() {
 
-        // Lista dos IDs dos jogadores
+        // lista dos IDs dos jogadores
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
@@ -555,14 +555,13 @@ public class GameManager {
             idParaReagir = (indexAtual == 0) ? ids.get(ids.size() - 1) : ids.get(indexAtual - 1);
         }
 
-        // para saber onde está o joador
         Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
 
-        // verificar se há uma ferramenta na casa atual
+        // --- verificar ferramenta ---
         if (board.getFerramentas().containsKey(posicao)) {
             Ferramenta f = board.getFerramentas().get(posicao);
-            if (!jogador.temFerramenta(f)) { // o jogador não tem ferramenta
+            if (!jogador.temFerramenta(f)) {
                 jogador.adicionarFerramenta(f);
                 board.getFerramentas().remove(posicao);
                 board.setTurnos(board.getTurnos() + 1);
@@ -573,12 +572,13 @@ public class GameManager {
             }
         }
 
-        // verificar se há um abismo na casa atual
+        // --- verificar abismo ---
         if (board.getAbismos().containsKey(posicao)) {
             Abismo a = board.getAbismos().get(posicao);
+            int aid = a.getId();
 
-            // se o jogador tiver ferramenta, o abismo é anulado
-            if (jogador.temFerramentaQueAnula(a)) { // o id da ferramenta é igual ao id do abismo
+            // verificar se o jogador tem ferramenta que anula o abismo
+            if (jogador.temFerramentaQueAnula(a)) {
                 jogador.usarFerramentaContra(a);
                 board.setTurnos(board.getTurnos() + 1);
                 return jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
@@ -586,59 +586,59 @@ public class GameManager {
 
             int novaPos = jogador.getPosicao();
 
-            switch (a.getId()) {
-                case 0:
-                    // Erro de Sintaxe → recua 1 casa
+            switch (aid) {
+
+                case 0: // Erro de Sintaxe
+                    // recua 1 casa
                     novaPos = Math.max(1, novaPos - 1);
                     break;
 
-                case 1:
-                    // Erro de Lógica → recua N casas, N = floor(valor do dado / 2)
+                case 1: // Erro de Lógica
+                    // recua N casas, N = floor(valor_do_dado / 2)
                     int dado = board.getUltimoValorDado();
                     int n = (int) Math.floor(dado / 2.0);
                     novaPos = Math.max(1, novaPos - n);
                     break;
 
-                case 2:
-                    // Exception → recua 2 casas
+                case 2: // Exception
+                    // recua 2 casas
                     novaPos = Math.max(1, novaPos - 2);
                     break;
 
-                case 3:
-                    // FileNotFoundException → recua 3 casas
+                case 3: // FileNotFoundException
+                    // recua 3 casas
                     novaPos = Math.max(1, novaPos - 3);
                     break;
 
-                case 4:
-                    // Crash → volta à primeira casa
+                case 4: // Crash
+                    // volta à primeira casa
                     novaPos = 1;
                     break;
 
-                case 5:
-                    // Código Duplicado → volta para a posição anterior
+                case 5: // Código Duplicado
+                    // recua para a casa anterior no histórico
                     novaPos = jogador.getPosicaoAnterior();
                     break;
 
-                case 6:
-                    // Efeitos Secundários → volta à posição de há dois turnos
+                case 6: // Efeitos Secundários
+                    // recua para a posição de há dois turnos
                     novaPos = jogador.getPosicaoHaDoisTurnos();
                     break;
 
-                case 7:
-                    // Blue Screen of Death → o jogador é derrotado
+                case 7: // Blue Screen of Death
+                    // perde o jogo
                     jogador.setDerrotado(true);
                     board.setTurnos(board.getTurnos() + 1);
                     return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
 
-                case 8:
-                    // Ciclo Infinito → o jogador fica preso, mas o jogo continua
+                case 8: // Ciclo Infinito
+                    // jogador fica preso
                     jogador.setPreso(true);
                     board.setTurnos(board.getTurnos() + 1);
                     return jogador.getNome() + " ficou preso num ciclo infinito!";
 
-                case 9:
-                    // Segmentation Fault → todos os jogadores na mesma casa recuam 3 casas,
-                    // apenas se houver dois ou mais jogadores nessa posição
+                case 9: // Segmentation Fault
+                    // se houver 2+ jogadores na mesma casa, todos recuam 3 casas
                     long count = board.getJogadores().values().stream()
                             .filter(p -> p.getPosicao() == posicao)
                             .count();
@@ -652,16 +652,16 @@ public class GameManager {
                     break;
             }
 
-            // atualizar posição e turno
             jogador.setPosicao(novaPos);
             board.setTurnos(board.getTurnos() + 1);
             return jogador.getNome() + " caiu no abismo " + a.getNome() + " e foi parar à casa " + novaPos + "!";
         }
 
-        // casa vazia, apenas incrementa turno
+        // casa vazia
         board.setTurnos(board.getTurnos() + 1);
         return null;
     }
+
 
 
 

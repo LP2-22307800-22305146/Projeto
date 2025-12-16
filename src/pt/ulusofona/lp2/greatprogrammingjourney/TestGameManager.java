@@ -1073,14 +1073,26 @@ public class TestGameManager {
 
         gm.createInitialBoard(jogadores, 12, objetos);
 
+        // JOGADA DA SARA
         // move 6 + 2 = 8 casas → chega à casa 9
         gm.moveCurrentPlayer(6); // o jogador atual que é a SARA vai para a casa 7
         gm.reactToAbyssOrTool(); // verifica se há algo na casa 7 e não há
+
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // o jogador atual que é a SARA vai para a casa 7
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 7 e não há
+
+        // JOGADA DA SARA
         gm.moveCurrentPlayer(2); // vai para acasa 9
         String msgFerramenta = gm.reactToAbyssOrTool(); // verifica na casa 9 se há algo e há uma ferramneta
         System.out.println(msgFerramenta); // vai aparecer a emnsagem da ferramenta
         assertTrue(msgFerramenta.contains("Herança")); // confirma se é a ferramenta correta
 
+        // JOGADA DO JOÃO
+        gm.moveCurrentPlayer(1); // jogador
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 7 e não há
+
+        // JOGADA DA SARA
         // move +1 → casa 10 (abismo)
         gm.moveCurrentPlayer(1); // vai para a casa do abismo
         String msgAbismo = gm.reactToAbyssOrTool(); // reage ao abismo
