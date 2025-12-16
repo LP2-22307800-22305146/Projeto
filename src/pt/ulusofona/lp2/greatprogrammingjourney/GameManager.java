@@ -556,15 +556,15 @@ public class GameManager {
         int idParaReagir;
         int atual = board.getCurrentPlayerID();
 
-        // se for o início do jogo ou existir apenas um jogador
-        if (board.getTurnos() == 0 || ids.size() == 1) {
-            idParaReagir = atual;
+
+        int indexAtual = ids.indexOf(board.getCurrentPlayerID());
+        if (indexAtual == 0) {
+            idParaReagir = ids.get(ids.size() - 1);
         } else {
-            // o jogador que reagirá é o que acabou de jogar (anterior)
-            int indexAtual = ids.indexOf(atual);
-            idParaReagir = (indexAtual == 0) ? ids.get(ids.size() - 1) : ids.get(indexAtual - 1);
+            idParaReagir = ids.get(indexAtual - 1);
         }
 
+        
         Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
 
