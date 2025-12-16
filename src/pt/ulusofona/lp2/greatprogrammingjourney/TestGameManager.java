@@ -913,6 +913,49 @@ public class TestGameManager {
         assertTrue(idxJava < idxPython);
     }
 
+    @Test
+    public void test_SyntaxVSToolIDE () {
+
+        GameManager gm = new GameManager();
+
+        String[][] jogadores = {
+                {"1", "Núria", "Python;C;Java", "Purple"},
+                {"2", "Sara", "Python;C;Java", "Green"}
+        };
+
+        String[][] objetos = {
+                {"1", "4", "9"},  // Casa 9 → Ferramenta 4 (IDE)
+                {"0", "0", "10"}  // Casa 10 → Abismo 0 (Erro de Sintaxe)
+        };
+
+        gm.createInitialBoard(jogadores, 20);
+
+        // JOGADA DA NÚRIA
+        gm.moveCurrentPlayer(6);
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 7 e não há
+
+        // JOGADA DO SARA
+        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
+
+        // JOGADA DA NÚRIA
+        gm.moveCurrentPlayer(2); // vai para acasa 9
+        String msgFerramenta = gm.reactToAbyssOrTool(); // verifica na casa 9 se há algo e há uma ferramneta
+        System.out.println(msgFerramenta); // vai aparecer a emnsagem da ferramenta
+        assertTrue(msgFerramenta.contains("IDE")); // confirma se é a ferramenta correta
+
+        // JOGADA DO SARA
+        gm.moveCurrentPlayer(1); // jogador atual que é a João vai para a casa 3
+        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
+
+        // JOGADA DA NÚRIA
+        // move +1 → casa 10 (abismo)
+        gm.moveCurrentPlayer(1); // vai para a casa do abismo
+        String msgAbismo = gm.reactToAbyssOrTool(); // reage ao abismo
+        System.out.println(msgAbismo); // manda a mensagem do abismo
+        assertTrue(msgAbismo.contains("evitou o abismo Erro de sintaxe"));
+
+    }
 
 
     /*

@@ -572,7 +572,7 @@ public class GameManager {
             Ferramenta f = board.getFerramentas().get(posicao);
             if (!jogador.temFerramenta(f)) {
                 jogador.adicionarFerramenta(f);
-                board.getFerramentas().remove(posicao);
+                //board.getFerramentas().remove(posicao);
                 board.setTurnos(board.getTurnos() + 1);
                 return jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
             } else {

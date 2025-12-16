@@ -1,5 +1,6 @@
 package pt.ulusofona.lp2.greatprogrammingjourney;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Board {
@@ -11,6 +12,7 @@ public class Board {
     private HashMap<Integer, Abismo> abismos = new HashMap<>();
     private HashMap<Integer, Ferramenta> ferramentas = new HashMap<>();
     private int ultimoValorDado = 0;
+    private boolean esperaReacao = false;
 
     public Board() {
         this.jogadores = new HashMap<>();
@@ -44,6 +46,18 @@ public class Board {
         return ferramentas;
     }
 
+    public boolean getEsperaReacao () {
+        return esperaReacao;
+    }
+
+    public int getUltimoValorDado() {
+        return ultimoValorDado;
+    }
+
+    public int getCurrentPlayerID() {
+        return currentPlayerID;
+    }
+
     // Setters
     public void setTamanho(int tamanho) {
         this.tamanho = tamanho;
@@ -52,20 +66,40 @@ public class Board {
     public void setCurrentPlayerID(int currentPlayerID) {
         this.currentPlayerID = currentPlayerID;
     }
-    public int getCurrentPlayerID() {
-        return currentPlayerID;
-    }
+
 
     public void setTurnos(int turnos) {
         this.turnos = turnos;
     }
 
-    public int getUltimoValorDado() {
-        return ultimoValorDado;
-    }
-
     public void setUltimoValorDado(int valor) {
         this.ultimoValorDado = valor;
+    }
+
+    public void setEsperaReacao (boolean reacao) {
+        esperaReacao = reacao;
+    }
+
+    // MÉTODOS
+
+    public void avancaProximoJogador() {
+        if (jogadores == null || jogadores.isEmpty()) {
+            return;
+        }
+
+        ArrayList<Integer> ids = new ArrayList<>(jogadores.keySet());
+        ids.sort(Integer::compareTo);
+
+        int atual = currentPlayerID;
+
+        // segurança extra
+        if (!ids.contains(atual)) {
+            currentPlayerID = ids.get(0);
+            return;
+        }
+
+        int proximo = ids.get((ids.indexOf(atual) + 1) % ids.size());
+        currentPlayerID = proximo;
     }
 
     public void printBoard() {

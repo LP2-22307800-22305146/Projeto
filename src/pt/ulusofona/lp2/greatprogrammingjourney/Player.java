@@ -151,8 +151,6 @@ public class Player {
         return false;
     }
 
-
-
     public void usarFerramentaContra(Abismo a) {
         int ferramentaParaRemover = -1;
 
