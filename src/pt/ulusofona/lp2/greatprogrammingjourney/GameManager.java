@@ -659,6 +659,7 @@ public class GameManager {
                         }
                     }
                     break;
+
             }
 
             jogador.setPosicao(novaPos);
@@ -691,10 +692,28 @@ public class GameManager {
         return false;
     }
 
+    public boolean isEmpate() {
+        int meta = board.getTamanho();
+
+        for (Player p : board.getJogadores().values()) {
+            // se alguém chegou à meta, NÃO é empate
+            if (p.getPosicao() == meta) {
+                return false;
+            }
+
+            // se alguém ainda não tem causa de derrota, NÃO é empate
+            if (p.getCausaDerrota() == null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
     public ArrayList<String> getGameResults() {
         ArrayList<String> resultados = new ArrayList<>();
 
-        //caso o jogo ainda não tenha terminado, retorna lista vazia
         if (!gameIsOver() || board.getJogadores().isEmpty()) {
             return resultados;
         }
@@ -702,20 +721,34 @@ public class GameManager {
         resultados.add("THE GREAT PROGRAMMING JOURNEY");
         resultados.add("");
 
-        //nr total de turnos
         resultados.add("NR. DE TURNOS");
-
-
         int turnos = board.getTurnos();
-        //garantimos que a jogada da vitória é contada
         if (gameIsOver()) {
             turnos++;
         }
         resultados.add(String.valueOf(turnos));
-        resultados.add(""); // linha vazia
+        resultados.add("");
 
-        //vencedor
+        //CASO EMPATE
+        if (isEmpate()) {
+            resultados.add("O jogo terminou empatado.");
+            resultados.add("");
+            resultados.add("Participantes:");
+
+            for (Player p : board.getJogadores().values()) {
+                resultados.add(
+                        p.getNome() + " : " +
+                                p.getPosicao() + " : " +
+                                p.getCausaDerrota()
+                );
+            }
+
+            return resultados;
+        }
+
+        //CASO VENCEDOR NORMAL
         resultados.add("VENCEDOR");
+
         Player vencedor = null;
         int meta = board.getTamanho();
 
@@ -727,22 +760,21 @@ public class GameManager {
         }
 
         if (vencedor == null) {
-            return resultados; //ainda não há vencedor —> lista vazia
+            return resultados;
         }
 
         resultados.add(vencedor.getNome());
         resultados.add("");
 
-        //Restantes jogadores (por proximidade à meta)
         resultados.add("RESTANTES");
+
         ArrayList<Player> restantes = new ArrayList<>(board.getJogadores().values());
         restantes.remove(vencedor);
 
-        //ordena por posição (maior → mais próximo da meta)
         restantes.sort((p1, p2) -> {
             int cmp = Integer.compare(p2.getPosicao(), p1.getPosicao());
             if (cmp == 0) {
-                return p1.getNome().compareToIgnoreCase(p2.getNome()); // ordem alfabética se empatados
+                return p1.getNome().compareToIgnoreCase(p2.getNome());
             }
             return cmp;
         });
@@ -753,6 +785,8 @@ public class GameManager {
 
         return resultados;
     }
+
+
 
     public void loadGame(File file) throws InvalidFileException, FileNotFoundException {
         if (!file.exists()) {

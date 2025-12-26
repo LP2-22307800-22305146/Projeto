@@ -1,6 +1,7 @@
 package pt.ulusofona.lp2.greatprogrammingjourney;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Player {
     private int id;
@@ -13,6 +14,8 @@ public class Player {
     private int posicaoHaDoisTurnos = 1;
     private boolean preso = false;
     private boolean derrotado = false;
+    private String causaDerrota = null;
+
 
     public Player(int id, String nome, String cor) {
         this.id = id;
@@ -99,6 +102,8 @@ public class Player {
         if (!temFerramenta(f)) {
             ferramentas.add(f);
         }
+        //ordenar alfabeticamente
+        ferramentas.sort(Comparator.comparing(Ferramenta::getNome));
     }
 
     //verifica se o jogador tem uma ferramenta que anula o abismo
@@ -117,7 +122,7 @@ public class Player {
                     }
                 }
                 case 2 -> { // Exception ← Tratamento de Exceções
-                    if (f.getId() == 3) {
+                    if (f.getId() == 3 || f.getId() == 100) {
                         return true;
                     }
                 }
@@ -179,5 +184,14 @@ public class Player {
         return linguagensFavoritas.get(0);
 
     }
+
+    public String getCausaDerrota() {
+        return causaDerrota;
+    }
+
+    public void setCausaDerrota(String causa) {
+        this.causaDerrota = causa;
+    }
+
 
 }
