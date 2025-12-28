@@ -9,6 +9,7 @@ import java.util.*;
 public class GameManager {
 
     private Board board; //agora o tabuleiro é um objeto!
+    private Player cicloInfinitoPreso = null;
 
     //construtor vazio
     public GameManager() {
@@ -489,6 +490,26 @@ public class GameManager {
         return menorID;
     }
 
+    private void avancarParaProximoJogador() {
+        ArrayList<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
+        Collections.sort(ids);
+
+        int atual = board.getCurrentPlayerID();
+        int index = ids.indexOf(atual);
+
+        for (int i = 1; i <= ids.size(); i++) {
+            int proximo = ids.get((index + i) % ids.size());
+            Player p = board.getJogadores().get(proximo);
+
+            if (!p.isDerrotado() && !p.isPreso()) {
+                board.setCurrentPlayerID(proximo);
+                return;
+            }
+        }
+        // se nenhum puder jogar, o jogo entra em empate (tratado noutro sítio)
+    }
+
+
     public boolean moveCurrentPlayer(int nrSpaces) {
         // valida se o valor do dado é entre 1 e 6
         if (nrSpaces < 1 || nrSpaces > 6) {
@@ -501,10 +522,16 @@ public class GameManager {
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
-        // verificar se o jogador existe e está ativo
-        if (jogadorAtual == null || jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
+        if (jogadorAtual == null) {
             return false;
         }
+
+        if (jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
+            // jogador não joga, mas o turno AVANÇA
+            avancarParaProximoJogador();
+            return true;
+        }
+
 
         // Restrição de Linguagem
         String primeiraLinguagem = jogadorAtual.primeiraLinguagem();
@@ -548,13 +575,18 @@ public class GameManager {
 
     public String reactToAbyssOrTool() {
 
+        // Se o jogador atual está preso ou derrotado, passar o turno
+        Player atual = board.getJogadores().get(board.getCurrentPlayerID());
+        if (atual != null && (atual.isPreso() || atual.isDerrotado())) {
+            avancarParaProximoJogador();
+            return null;
+        }
+
         // lista dos IDs dos jogadores
         List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
         Collections.sort(ids);
 
         int idParaReagir;
-        int atual = board.getCurrentPlayerID();
-
 
         int indexAtual = ids.indexOf(board.getCurrentPlayerID());
         if (indexAtual == 0) {
@@ -635,16 +667,42 @@ public class GameManager {
                     break;
 
                 case 7: // Blue Screen of Death
-                    // perde o jogo
                     jogador.setDerrotado(true);
+                    jogador.setCausaDerrota("Blue Screen of Death");
+
                     board.setTurnos(board.getTurnos() + 1);
-                    return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
+
+                    // avançar turno
+                    avancarParaProximoJogador();
+
+                    // verificar empate automático
+                    if (isEmpate()) {
+                        // não faz mais nada, jogo termina
+                        return jogador.getNome() + " sofreu uma Blue Screen of Death!";
+                    }
+
+                    return jogador.getNome() + " sofreu uma Blue Screen of Death!";
 
                 case 8: // Ciclo Infinito
-                    // jogador fica preso
+
+                    // Se já houver alguém preso, libertar
+                    if (cicloInfinitoPreso != null && cicloInfinitoPreso != jogador) {
+                        cicloInfinitoPreso.setPreso(false);
+                        cicloInfinitoPreso.setCausaDerrota(null);
+                    }
+
+                    // Prender o jogador atual
                     jogador.setPreso(true);
+                    jogador.setCausaDerrota("Ciclo Infinito");
+                    cicloInfinitoPreso = jogador;
+
                     board.setTurnos(board.getTurnos() + 1);
-                    return jogador.getNome() + " ficou preso num ciclo infinito!";
+
+                    // Avançar para o próximo jogador
+                    avancarParaProximoJogador();
+
+                    return jogador.getNome() + " ficou preso num Ciclo Infinito!";
+
 
                 case 9: // Segmentation Fault
                     // se houver 2+ jogadores na mesma casa, todos recuam 3 casas

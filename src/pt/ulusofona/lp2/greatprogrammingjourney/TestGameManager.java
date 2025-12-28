@@ -873,8 +873,6 @@ public class TestGameManager {
         assertTrue(idxJava < idxPython);
     }
 
-   
-
 
 }
 
