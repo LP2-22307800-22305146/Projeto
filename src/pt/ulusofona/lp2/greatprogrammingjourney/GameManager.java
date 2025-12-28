@@ -10,6 +10,8 @@ public class GameManager {
 
     private Board board; //agora o tabuleiro é um objeto!
     private Player cicloInfinitoPreso = null;
+    private int ultimoJogadorMovido;
+
 
     //construtor vazio
     public GameManager() {
@@ -509,6 +511,14 @@ public class GameManager {
         // se nenhum puder jogar, o jogo entra em empate (tratado noutro sítio)
     }
 
+    public void setUltimoJogadorMovido(int id) {
+        this.ultimoJogadorMovido = id;
+    }
+
+    public int getUltimoJogadorMovido() {
+        return ultimoJogadorMovido;
+    }
+
 
     public boolean moveCurrentPlayer(int nrSpaces) {
         // valida se o valor do dado é entre 1 e 6
@@ -518,6 +528,8 @@ public class GameManager {
 
         // guardar o valor do dado para uso posterior em abismos (ex: Erro de Lógica)
         board.setUltimoValorDado(nrSpaces);
+
+
 
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
@@ -557,6 +569,8 @@ public class GameManager {
 
         // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
+// guardar quem acabou de jogar (para reagir a abismos)
+        board.setUltimoJogadorMovido(idAtual);
 
 
         // se o jogador chegou ao fim, o jogo termina
@@ -575,29 +589,20 @@ public class GameManager {
 
     public String reactToAbyssOrTool() {
 
-        // Se o jogador atual está preso ou derrotado, passar o turno
-        Player atual = board.getJogadores().get(board.getCurrentPlayerID());
-        if (atual != null && (atual.isPreso() || atual.isDerrotado())) {
-            avancarParaProximoJogador();
+        int idReagir = board.getUltimoJogadorMovido();
+
+        if (idReagir == -1) {
             return null;
         }
 
-        // lista dos IDs dos jogadores
-        List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
-        Collections.sort(ids);
+        Player jogador = board.getJogadores().get(idReagir);
 
-        int idParaReagir;
-
-        int indexAtual = ids.indexOf(board.getCurrentPlayerID());
-        if (indexAtual == 0) {
-            idParaReagir = ids.get(ids.size() - 1);
-        } else {
-            idParaReagir = ids.get(indexAtual - 1);
+        if (jogador == null || jogador.isDerrotado()) {
+            return null;
         }
 
-
-        Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
+
 
         // --- verificar ferramenta ---
         if (board.getFerramentas().containsKey(posicao)) {
@@ -672,16 +677,9 @@ public class GameManager {
 
                     board.setTurnos(board.getTurnos() + 1);
 
-                    // avançar turno
                     avancarParaProximoJogador();
-
-                    // verificar empate automático
-                    if (isEmpate()) {
-                        // não faz mais nada, jogo termina
-                        return jogador.getNome() + " sofreu uma Blue Screen of Death!";
-                    }
-
                     return jogador.getNome() + " sofreu uma Blue Screen of Death!";
+
 
                 case 8: // Ciclo Infinito
 
@@ -731,24 +729,41 @@ public class GameManager {
     }
 
     public boolean gameIsOver() {
-        //se o tabuleiro não tem jogadores, o jogo não pode ter terminado
+
         if (board.getJogadores().isEmpty()) {
             return false;
         }
 
+        int meta = board.getTamanho();
 
-        int meta = board.getTamanho(); //ultima posição do tabuleiro
-
-        //percorre todos os jogadores e verifica se alguém chegou à meta
+        // 1️⃣ Vitória normal
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
-                return true; //o jogo termina imediatamente
+                avancarParaProximoJogador();
+                return true;
             }
         }
 
-        //ninguém chegou ainda
+        // 2️⃣ Verificar se alguém ainda pode jogar
+        boolean alguemPodeJogar = false;
+
+        for (Player p : board.getJogadores().values()) {
+            if (!p.isDerrotado() && !p.isPreso()) {
+                alguemPodeJogar = true;
+                break;
+            }
+        }
+
+        // 3️⃣ Ninguém pode jogar → EMPATE
+        if (!alguemPodeJogar) {
+            avancarParaProximoJogador();
+            return true;
+        }
+
         return false;
     }
+
+
 
     public boolean isEmpate() {
         int meta = board.getTamanho();
