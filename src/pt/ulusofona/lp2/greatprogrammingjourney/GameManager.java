@@ -589,6 +589,7 @@ public class GameManager {
     }
 
     public String reactToAbyssOrTool() {
+        board.setTurnos(board.getTurnos() + 1);
 
         int idReagir = board.getUltimoJogadorMovido();
 
@@ -678,31 +679,34 @@ public class GameManager {
 
                     board.setTurnos(board.getTurnos() + 1);
 
-                    avancarParaProximoJogador();
+                    // 🔒 SÓ AVANÇA SE O JOGO NÃO TERMINOU
+                    if (!isEmpate() && !gameIsOver()) {
+                        avancarParaProximoJogador();
+                    }
+
                     return jogador.getNome() + " sofreu uma Blue Screen of Death!";
 
 
-                case 8: // Ciclo Infinito
-                    //libertar APENAS se for o MESMO ciclo infinito
-                    if (cicloInfinitoPreso != null
-                            && cicloInfinitoPreso != jogador
-                            && posicaoCicloInfinito == jogador.getPosicao()) {
 
+                case 8: // Ciclo Infinito
+
+                    if (cicloInfinitoPreso != null && cicloInfinitoPreso != jogador) {
                         cicloInfinitoPreso.setPreso(false);
                     }
 
-                    //prender o jogador atual
                     jogador.setPreso(true);
                     jogador.setCausaDerrota("Ciclo Infinito");
                     cicloInfinitoPreso = jogador;
-                    posicaoCicloInfinito = jogador.getPosicao();
 
                     board.setTurnos(board.getTurnos() + 1);
 
-                    //avançar turno
-                    avancarParaProximoJogador();
+                    // 🔒 SÓ AVANÇA SE O JOGO NÃO TERMINOU
+                    if (!isEmpate() && !gameIsOver()) {
+                        avancarParaProximoJogador();
+                    }
 
                     return jogador.getNome() + " ficou preso num Ciclo Infinito!";
+
 
 
                 case 9: // Segmentation Fault
@@ -727,7 +731,6 @@ public class GameManager {
         }
 
         // casa vazia
-        board.setTurnos(board.getTurnos() + 1);
         return null;
     }
 
