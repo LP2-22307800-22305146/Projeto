@@ -10,6 +10,7 @@ public class GameManager {
 
     private Board board; //agora o tabuleiro é um objeto!
     private Player cicloInfinitoPreso = null;
+    private int posicaoCicloInfinito = -1;
     private int ultimoJogadorMovido;
 
 
@@ -682,21 +683,23 @@ public class GameManager {
 
 
                 case 8: // Ciclo Infinito
+                    //libertar APENAS se for o MESMO ciclo infinito
+                    if (cicloInfinitoPreso != null
+                            && cicloInfinitoPreso != jogador
+                            && posicaoCicloInfinito == jogador.getPosicao()) {
 
-                    // Se já houver alguém preso, libertar
-                    if (cicloInfinitoPreso != null && cicloInfinitoPreso != jogador) {
                         cicloInfinitoPreso.setPreso(false);
-                        cicloInfinitoPreso.setCausaDerrota(null);
                     }
 
-                    // Prender o jogador atual
+                    //prender o jogador atual
                     jogador.setPreso(true);
                     jogador.setCausaDerrota("Ciclo Infinito");
                     cicloInfinitoPreso = jogador;
+                    posicaoCicloInfinito = jogador.getPosicao();
 
                     board.setTurnos(board.getTurnos() + 1);
 
-                    // Avançar para o próximo jogador
+                    //avançar turno
                     avancarParaProximoJogador();
 
                     return jogador.getNome() + " ficou preso num Ciclo Infinito!";
@@ -736,7 +739,7 @@ public class GameManager {
 
         int meta = board.getTamanho();
 
-        // 1️⃣ Vitória normal
+        //vitoria normal
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
                 avancarParaProximoJogador();
@@ -744,7 +747,7 @@ public class GameManager {
             }
         }
 
-        // 2️⃣ Verificar se alguém ainda pode jogar
+        //verificar se alguem ainda pode jogar
         boolean alguemPodeJogar = false;
 
         for (Player p : board.getJogadores().values()) {
@@ -754,7 +757,7 @@ public class GameManager {
             }
         }
 
-        // 3️⃣ Ninguém pode jogar → EMPATE
+        //ninguem pode jogar → EMPATE
         if (!alguemPodeJogar) {
             avancarParaProximoJogador();
             return true;
@@ -775,7 +778,7 @@ public class GameManager {
             }
 
             // se alguém ainda não tem causa de derrota, NÃO é empate
-            if (p.getCausaDerrota() == null) {
+            if (p.getCausaDerrota() == null && !p.isPreso()) {
                 return false;
             }
         }
