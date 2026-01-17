@@ -419,35 +419,20 @@ public class GameManager {
             }
         }
 
-        // --- [1] Descrição ---
         String descricao = "";
         String tipoEId = "";
 
-        // verificar abismos
-        if (board.getAbismos().containsKey(position)) {
-            Abismo a = board.getAbismos().get(position);
-            descricao = switch (a.getId()) {
-                case 0 -> "Erro de sintaxe";
-                case 1 -> "Erro de Lógica";
-                case 2 -> "Exception";
-                case 3 -> "FileNotFoundException";
-                case 4 -> "Crash";
-                case 5 -> "Código Duplicado";
-                case 6 -> "Efeitos Secundários";
-                case 7 -> "Blue Screen of Death";
-                case 8 -> "Ciclo Infinito";
-                case 9 -> "Segmentation Fault";
-                case 20 -> "LLM";
-                default -> "Desconhecido";
-            };
-            tipoEId = "A:" + a.getId();
-        }
-
-        // verificar ferramentas (só se não houver abismo)
-        else if (board.getFerramentas().containsKey(position)) {
+// ferramentas primeiro
+        if (board.getFerramentas().containsKey(position)) {
             Ferramenta f = board.getFerramentas().get(position);
             descricao = f.getNome();
             tipoEId = "T:" + f.getId();
+        }
+// depois abismos
+        else if (board.getAbismos().containsKey(position)) {
+            Abismo a = board.getAbismos().get(position);
+            descricao = a.getNome(); // usa o nome do Abismo se tiveres
+            tipoEId = "A:" + a.getId();
         }
 
         // --- Retornar sempre 3 elementos ---
@@ -503,8 +488,15 @@ public class GameManager {
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
         // verificar se o jogador existe e está ativo
-        if (jogadorAtual == null || jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
+        if (jogadorAtual == null || jogadorAtual.isDerrotado()) {
             return false;
+        }
+
+        if (jogadorAtual.isPreso()) {
+            jogadorAtual.setPreso(false);
+            board.setTurnos(board.getTurnos() + 1);
+            avancarTurno();
+            return true;
         }
 
         // Restrição de Linguagem
@@ -768,22 +760,21 @@ public class GameManager {
         int meta = board.getTamanho();
         int winnerId = -1;
 
-        // normal
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
-                winnerId = Math.max(winnerId, p.getId());
+                if (winnerId == -1 || p.getId() < winnerId) {
+                    winnerId = p.getId(); // menor ID vence
+                }
             }
         }
 
-        if(winnerId != -1){
+        if (winnerId != -1) {
             board.setCurrentPlayerID(winnerId);
             return true;
         }
 
-        // empate
         return nenhumJogadorPodeJogar();
     }
-
 
 
 
@@ -816,8 +807,26 @@ public class GameManager {
             resultados.add("");
             resultados.add("Participantes:");
 
-            for (Player p : board.getJogadores().values()) {
-                resultados.add(p.getNome() + " " + p.getPosicao());
+            ArrayList<Player> lista = new ArrayList<>(board.getJogadores().values());
+
+            // ordenar por posição desc; se empatar, por nome asc
+            lista.sort((p1, p2) -> {
+                int cmp = Integer.compare(p2.getPosicao(), p1.getPosicao());
+                if (cmp != 0) return cmp;
+                return p1.getNome().compareToIgnoreCase(p2.getNome());
+            });
+
+            for (Player p : lista) {
+                String estado;
+                if (p.isPreso()) {
+                    estado = "Ciclo Infinito";
+                } else if (p.isDerrotado()) {
+                    estado = "Blue Screen of Death";
+                } else {
+                    estado = "Em Jogo";
+                }
+
+                resultados.add(p.getNome() + " : " + p.getPosicao() + " : " + estado);
             }
 
             return resultados;
@@ -1055,11 +1064,11 @@ public class GameManager {
         int atual = board.getCurrentPlayerID();
         int idx = idsOrdenados.indexOf(atual);
 
-        // se por alguma razão o atual não estiver na lista, mete o menor ID válido
+        // se o atual não estiver na lista, mete o menor ID não derrotado
         if (idx < 0) {
             for (int id : idsOrdenados) {
                 Player p = board.getJogadores().get(id);
-                if (p != null && !p.isDerrotado() && !p.isPreso()) {
+                if (p != null && !p.isDerrotado()) {
                     board.setCurrentPlayerID(id);
                     return;
                 }
@@ -1071,11 +1080,12 @@ public class GameManager {
             int cand = idsOrdenados.get((idx + i) % idsOrdenados.size());
             Player p = board.getJogadores().get(cand);
 
-            // SALTA derrotados e presos
-            if (p != null && !p.isDerrotado() && !p.isPreso()) {
+            // só salta DERROTADOS (presos continuam na rotação)
+            if (p != null && !p.isDerrotado()) {
                 board.setCurrentPlayerID(cand);
                 return;
             }
         }
     }
+
 }
