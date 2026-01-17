@@ -1,16 +1,20 @@
 package pt.ulusofona.lp2.greatprogrammingjourney;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Player {
     private int id;
     private String nome;
     private String cor;
-    private int posicao;
+    private int posicao=1;
+
     private ArrayList<String> linguagensFavoritas = new ArrayList<>();
     private ArrayList<Ferramenta> ferramentas = new ArrayList<>();
+
     private int posicaoAnterior = 1;
     private int posicaoHaDoisTurnos = 1;
+
     private boolean preso = false;
     private boolean derrotado = false;
 
@@ -18,8 +22,7 @@ public class Player {
         this.id = id;
         this.nome = nome.trim();
         this.cor = cor.trim();
-        this.posicao = 1; //começa na posição inicial
-    }
+            }
 
     // Getters
     public int getId() { return id; }
@@ -32,7 +35,6 @@ public class Player {
         return ferramentas;
     }
 
-    // GETTERS
     public ArrayList<String> getLinguagensFavoritas() {
         return linguagensFavoritas;
     }
@@ -80,6 +82,7 @@ public class Player {
         return String.join(";", linguagensFavoritas);
     }
 
+
     public boolean isDerrotado() {
         return derrotado;
     }
@@ -94,12 +97,16 @@ public class Player {
         return false;
     }
 
+
     //adiciona uma ferramenta ao jogador (se ainda não a tiver)
     public void adicionarFerramenta(Ferramenta f) {
         if (!temFerramenta(f)) {
             ferramentas.add(f);
+            ferramentas.sort(Comparator.comparing(Ferramenta::getNome));
         }
     }
+
+
 
     //verifica se o jogador tem uma ferramenta que anula o abismo
     // (por agora simplificamos: qualquer ferramenta pode anular um abismo)
@@ -146,6 +153,11 @@ public class Player {
                         return true;
                     }
                 }
+                case 20 -> { //LLM ← Ajuda do Professor
+                    if (f.getId() == 5) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -163,6 +175,8 @@ public class Player {
             case 5 -> ferramentaParaRemover = 0; // Código Duplicado ← Herança
             case 6 -> ferramentaParaRemover = 1; // Efeitos Secundários ← Programação Funcional
             case 8 -> ferramentaParaRemover = 5; // Ciclo Infinito ← Ajuda do Professor
+            case 20 -> ferramentaParaRemover = 5; // LLM ← Ajuda do Professor
+
         }
 
         int finalFerramentaParaRemover = ferramentaParaRemover;
@@ -180,4 +194,16 @@ public class Player {
 
     }
 
+    //LLM
+    public void usarFerramenta(String nome) {
+        ferramentas.removeIf(f -> f.getNome().equals(nome));
+    }
+    public boolean temFerramenta(String nome) {
+        for (Ferramenta f : ferramentas) {
+            if (f.getNome().equals(nome)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

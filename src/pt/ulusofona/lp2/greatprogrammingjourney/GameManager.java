@@ -208,7 +208,7 @@ public class GameManager {
 
                     // Verificar tipo
                     if (tipo == 0) {
-                        if (id < 0 || id > 9) {
+                        if ((id < 0 || id > 9)&& id != 20) {
                             return false;
                         }
                         board.getAbismos().put(posicao, new Abismo(id, posicao));
@@ -437,6 +437,7 @@ public class GameManager {
                 case 7 -> "Blue Screen of Death";
                 case 8 -> "Ciclo Infinito";
                 case 9 -> "Segmentation Fault";
+                case 20 -> "LLM";
                 default -> "Desconhecido";
             };
             tipoEId = "A:" + a.getId();
@@ -657,8 +658,42 @@ public class GameManager {
                                 p.setPosicao(Math.max(1, p.getPosicao() - 3));
                             }
                         }
+                        break;
                     }
-                    break;
+                case 20: // LLM
+
+                    boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
+
+                    //aTÉ À 3ª RONDA (turnos < 3)
+                    if (board.getTurnos() < 3) {
+
+                        if (temAjuda) {
+                            jogador.usarFerramenta("Ajuda Do Professor");
+                            board.setTurnos(board.getTurnos() + 1);
+                            return jogador.getNome() + " evitou o abismo LLM com Ajuda do Professor!";
+                        }
+
+                        int posAnterior = jogador.getPosicaoAnterior();
+                        jogador.setPosicao(posAnterior);
+                        board.setTurnos(board.getTurnos() + 1);
+
+                        return jogador.getNome() + " recuou devido ao abismo LLM!";
+                    }
+
+                    //A PARTIR DA 4ª RONDA (turnos >= 3)
+                    int avancar = board.getUltimoValorDado();
+                    int novaPosLLM = jogador.getPosicao() + avancar;
+
+                    if (novaPosLLM > board.getTamanho()) {
+                        int excesso = novaPosLLM - board.getTamanho();
+                        novaPosLLM = board.getTamanho() - excesso;
+                    }
+
+                    jogador.setPosicao(novaPosLLM);
+                    board.setTurnos(board.getTurnos() + 1);
+
+                    return jogador.getNome() + " beneficiou do LLM e avançou " + avancar + " casas!";
+
             }
 
             jogador.setPosicao(novaPos);
