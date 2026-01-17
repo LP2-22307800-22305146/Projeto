@@ -590,7 +590,7 @@ public class GameManager {
             int aid = a.getId();
 
             // verificar se o jogador tem ferramenta que anula o abismo
-            if (jogador.temFerramentaQueAnula(a)) {
+            if (jogador.temFerramentaQueAnula(a, board.getTurnos())) {
                 jogador.usarFerramentaContra(a);
                 board.setTurnos(board.getTurnos() + 1);
                 return jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
@@ -663,16 +663,18 @@ public class GameManager {
                         break;
                     }
                 case 20: // LLM
-                    boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
                     //aTÉ À 3ª RONDA (turnos < 3)
                     if (jogador.getJogadas() < 4){
+
+                        boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
+
                         if (temAjuda) {
                             jogador.usarFerramenta("Ajuda Do Professor");
                             board.setTurnos(board.getTurnos() + 1);
                             return jogador.getNome() + " evitou o abismo LLM com Ajuda do Professor!";
                         }
-                        int posAnterior = jogador.getPosicaoAnterior();
-                        jogador.setPosicao(posAnterior);
+                        // Sem ajuda → recua
+                        jogador.setPosicao(jogador.getPosicaoAnterior());
                         board.setTurnos(board.getTurnos() + 1);
                         return jogador.getNome() + " recuou devido ao abismo LLM!";
                     }

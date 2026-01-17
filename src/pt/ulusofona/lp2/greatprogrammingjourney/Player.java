@@ -118,8 +118,7 @@ public class Player {
 
 
     //verifica se o jogador tem uma ferramenta que anula o abismo
-    // (por agora simplificamos: qualquer ferramenta pode anular um abismo)
-    public boolean temFerramentaQueAnula(Abismo a) {
+    public boolean temFerramentaQueAnula(Abismo a, int turnoAtual) {
         for (Ferramenta f : ferramentas) {
             switch (a.getId()) {
                 case 0 -> { // Erro de Sintaxe ← IDE
@@ -163,7 +162,7 @@ public class Player {
                     }
                 }
                 case 20 -> { //LLM ← Ajuda do Professor
-                    if (f.getId() == 5) {
+                    if (f.getId() == 5 && turnoAtual < 4) {
                         return true;
                     }
                 }
