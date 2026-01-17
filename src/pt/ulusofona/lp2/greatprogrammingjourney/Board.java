@@ -13,7 +13,6 @@ public class Board {
     private HashMap<Integer, Ferramenta> ferramentas = new HashMap<>();
     private int ultimoValorDado = 0;
     private boolean esperaReacao = false;
-    private int ultimoJogadorMovido;
 
     public Board() {
         this.jogadores = new HashMap<>();
@@ -35,7 +34,7 @@ public class Board {
         return jogadores;
     }
 
-    public Board getBoard() {
+    public Board getBoard () {
         return this;
     }
 
@@ -47,7 +46,7 @@ public class Board {
         return ferramentas;
     }
 
-    public boolean getEsperaReacao() {
+    public boolean getEsperaReacao () {
         return esperaReacao;
     }
 
@@ -77,7 +76,7 @@ public class Board {
         this.ultimoValorDado = valor;
     }
 
-    public void setEsperaReacao(boolean reacao) {
+    public void setEsperaReacao (boolean reacao) {
         esperaReacao = reacao;
     }
 
@@ -122,11 +121,4 @@ public class Board {
     }
 
 
-    public void setUltimoJogadorMovido(int id) {
-        this.ultimoJogadorMovido = id;
-    }
-
-    public int getUltimoJogadorMovido() {
-        return ultimoJogadorMovido;
-    }
 }

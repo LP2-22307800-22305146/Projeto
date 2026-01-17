@@ -38,7 +38,6 @@ public class Abismo {
             case 7: return "Blue Screen of Death";
             case 8: return "Ciclo Infinito";
             case 9: return "Segmentation Fault";
-            case 20: return "LLM";
             default: return "Abismo Desconhecido";
         }
     }

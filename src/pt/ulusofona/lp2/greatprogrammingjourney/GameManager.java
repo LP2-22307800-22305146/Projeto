@@ -9,10 +9,6 @@ import java.util.*;
 public class GameManager {
 
     private Board board; //agora o tabuleiro é um objeto!
-    private Player cicloInfinitoPreso = null;
-    private int posicaoCicloInfinito = -1;
-    private int ultimoJogadorMovido;
-
 
     //construtor vazio
     public GameManager() {
@@ -493,34 +489,6 @@ public class GameManager {
         return menorID;
     }
 
-    private void avancarParaProximoJogador() {
-        ArrayList<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
-        Collections.sort(ids);
-
-        int atual = board.getCurrentPlayerID();
-        int index = ids.indexOf(atual);
-
-        for (int i = 1; i <= ids.size(); i++) {
-            int proximo = ids.get((index + i) % ids.size());
-            Player p = board.getJogadores().get(proximo);
-
-            if (!p.isDerrotado() && !p.isPreso()) {
-                board.setCurrentPlayerID(proximo);
-                return;
-            }
-        }
-        // se nenhum puder jogar, o jogo entra em empate (tratado noutro sítio)
-    }
-
-    public void setUltimoJogadorMovido(int id) {
-        this.ultimoJogadorMovido = id;
-    }
-
-    public int getUltimoJogadorMovido() {
-        return ultimoJogadorMovido;
-    }
-
-
     public boolean moveCurrentPlayer(int nrSpaces) {
         // valida se o valor do dado é entre 1 e 6
         if (nrSpaces < 1 || nrSpaces > 6) {
@@ -530,21 +498,13 @@ public class GameManager {
         // guardar o valor do dado para uso posterior em abismos (ex: Erro de Lógica)
         board.setUltimoValorDado(nrSpaces);
 
-
-
         int idAtual = board.getCurrentPlayerID();
         Player jogadorAtual = board.getJogadores().get(idAtual);
 
-        if (jogadorAtual == null) {
+        // verificar se o jogador existe e está ativo
+        if (jogadorAtual == null || jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
             return false;
         }
-
-        if (jogadorAtual.isDerrotado() || jogadorAtual.isPreso()) {
-            // jogador não joga, mas o turno AVANÇA
-            avancarParaProximoJogador();
-            return true;
-        }
-
 
         // Restrição de Linguagem
         String primeiraLinguagem = jogadorAtual.primeiraLinguagem();
@@ -570,8 +530,6 @@ public class GameManager {
 
         // aplicar a nova posição
         jogadorAtual.setPosicao(novaPosicao);
-// guardar quem acabou de jogar (para reagir a abismos)
-        board.setUltimoJogadorMovido(idAtual);
 
 
         // se o jogador chegou ao fim, o jogo termina
@@ -589,22 +547,25 @@ public class GameManager {
     }
 
     public String reactToAbyssOrTool() {
-        board.setTurnos(board.getTurnos() + 1);
 
-        int idReagir = board.getUltimoJogadorMovido();
+        // lista dos IDs dos jogadores
+        List<Integer> ids = new ArrayList<>(board.getJogadores().keySet());
+        Collections.sort(ids);
 
-        if (idReagir == -1) {
-            return null;
+        int idParaReagir;
+        int atual = board.getCurrentPlayerID();
+
+
+        int indexAtual = ids.indexOf(board.getCurrentPlayerID());
+        if (indexAtual == 0) {
+            idParaReagir = ids.get(ids.size() - 1);
+        } else {
+            idParaReagir = ids.get(indexAtual - 1);
         }
 
-        Player jogador = board.getJogadores().get(idReagir);
 
-        if (jogador == null || jogador.isDerrotado()) {
-            return null;
-        }
-
+        Player jogador = board.getJogadores().get(idParaReagir);
         int posicao = jogador.getPosicao();
-
 
         // --- verificar ferramenta ---
         if (board.getFerramentas().containsKey(posicao)) {
@@ -674,40 +635,16 @@ public class GameManager {
                     break;
 
                 case 7: // Blue Screen of Death
+                    // perde o jogo
                     jogador.setDerrotado(true);
-                    jogador.setCausaDerrota("Blue Screen of Death");
-
                     board.setTurnos(board.getTurnos() + 1);
-
-                    // 🔒 SÓ AVANÇA SE O JOGO NÃO TERMINOU
-                    if (!isEmpate() && !gameIsOver()) {
-                        avancarParaProximoJogador();
-                    }
-
-                    return jogador.getNome() + " sofreu uma Blue Screen of Death!";
-
-
+                    return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
 
                 case 8: // Ciclo Infinito
-
-                    if (cicloInfinitoPreso != null && cicloInfinitoPreso != jogador) {
-                        cicloInfinitoPreso.setPreso(false);
-                    }
-
+                    // jogador fica preso
                     jogador.setPreso(true);
-                    jogador.setCausaDerrota("Ciclo Infinito");
-                    cicloInfinitoPreso = jogador;
-
                     board.setTurnos(board.getTurnos() + 1);
-
-                    // 🔒 SÓ AVANÇA SE O JOGO NÃO TERMINOU
-                    if (!isEmpate() && !gameIsOver()) {
-                        avancarParaProximoJogador();
-                    }
-
-                    return jogador.getNome() + " ficou preso num Ciclo Infinito!";
-
-
+                    return jogador.getNome() + " ficou preso num ciclo infinito!";
 
                 case 9: // Segmentation Fault
                     // se houver 2+ jogadores na mesma casa, todos recuam 3 casas
@@ -722,7 +659,6 @@ public class GameManager {
                         }
                     }
                     break;
-
             }
 
             jogador.setPosicao(novaPos);
@@ -731,68 +667,34 @@ public class GameManager {
         }
 
         // casa vazia
+        board.setTurnos(board.getTurnos() + 1);
         return null;
     }
 
     public boolean gameIsOver() {
-
+        //se o tabuleiro não tem jogadores, o jogo não pode ter terminado
         if (board.getJogadores().isEmpty()) {
             return false;
         }
 
-        int meta = board.getTamanho();
 
-        //vitoria normal
+        int meta = board.getTamanho(); //ultima posição do tabuleiro
+
+        //percorre todos os jogadores e verifica se alguém chegou à meta
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
-                avancarParaProximoJogador();
-                return true;
+                return true; //o jogo termina imediatamente
             }
         }
 
-        //verificar se alguem ainda pode jogar
-        boolean alguemPodeJogar = false;
-
-        for (Player p : board.getJogadores().values()) {
-            if (!p.isDerrotado() && !p.isPreso()) {
-                alguemPodeJogar = true;
-                break;
-            }
-        }
-
-        //ninguem pode jogar → EMPATE
-        if (!alguemPodeJogar) {
-            avancarParaProximoJogador();
-            return true;
-        }
-
+        //ninguém chegou ainda
         return false;
     }
-
-
-
-    public boolean isEmpate() {
-        int meta = board.getTamanho();
-
-        for (Player p : board.getJogadores().values()) {
-            // se alguém chegou à meta, NÃO é empate
-            if (p.getPosicao() == meta) {
-                return false;
-            }
-
-            // se alguém ainda não tem causa de derrota, NÃO é empate
-            if (p.getCausaDerrota() == null && !p.isPreso()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
 
     public ArrayList<String> getGameResults() {
         ArrayList<String> resultados = new ArrayList<>();
 
+        //caso o jogo ainda não tenha terminado, retorna lista vazia
         if (!gameIsOver() || board.getJogadores().isEmpty()) {
             return resultados;
         }
@@ -800,34 +702,20 @@ public class GameManager {
         resultados.add("THE GREAT PROGRAMMING JOURNEY");
         resultados.add("");
 
+        //nr total de turnos
         resultados.add("NR. DE TURNOS");
+
+
         int turnos = board.getTurnos();
+        //garantimos que a jogada da vitória é contada
         if (gameIsOver()) {
             turnos++;
         }
         resultados.add(String.valueOf(turnos));
-        resultados.add("");
+        resultados.add(""); // linha vazia
 
-        //CASO EMPATE
-        if (isEmpate()) {
-            resultados.add("O jogo terminou empatado.");
-            resultados.add("");
-            resultados.add("Participantes:");
-
-            for (Player p : board.getJogadores().values()) {
-                resultados.add(
-                        p.getNome() + " : " +
-                                p.getPosicao() + " : " +
-                                p.getCausaDerrota()
-                );
-            }
-
-            return resultados;
-        }
-
-        //CASO VENCEDOR NORMAL
+        //vencedor
         resultados.add("VENCEDOR");
-
         Player vencedor = null;
         int meta = board.getTamanho();
 
@@ -839,21 +727,22 @@ public class GameManager {
         }
 
         if (vencedor == null) {
-            return resultados;
+            return resultados; //ainda não há vencedor —> lista vazia
         }
 
         resultados.add(vencedor.getNome());
         resultados.add("");
 
+        //Restantes jogadores (por proximidade à meta)
         resultados.add("RESTANTES");
-
         ArrayList<Player> restantes = new ArrayList<>(board.getJogadores().values());
         restantes.remove(vencedor);
 
+        //ordena por posição (maior → mais próximo da meta)
         restantes.sort((p1, p2) -> {
             int cmp = Integer.compare(p2.getPosicao(), p1.getPosicao());
             if (cmp == 0) {
-                return p1.getNome().compareToIgnoreCase(p2.getNome());
+                return p1.getNome().compareToIgnoreCase(p2.getNome()); // ordem alfabética se empatados
             }
             return cmp;
         });
@@ -864,8 +753,6 @@ public class GameManager {
 
         return resultados;
     }
-
-
 
     public void loadGame(File file) throws InvalidFileException, FileNotFoundException {
         if (!file.exists()) {
