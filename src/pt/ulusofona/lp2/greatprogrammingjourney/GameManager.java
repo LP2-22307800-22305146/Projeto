@@ -686,6 +686,12 @@ public class GameManager {
                         novaPosLLM = board.getTamanho() - excesso;
                     }
                     jogador.setPosicao(novaPosLLM);
+
+                    //testar
+                    if(novaPosLLM == board.getTamanho()){
+                        board.setCurrentPlayerID(jogador.getId());
+                    }
+
                     board.setTurnos(board.getTurnos() + 1);
                     return jogador.getNome() + " beneficiou do LLM e avançou " + avancar + " casas!";
             }
@@ -703,6 +709,7 @@ public class GameManager {
                 return false; // há pelo menos um jogador ativo
             }
         }
+
         return true; // todos estão presos ou derrotados
     }
 
@@ -712,19 +719,24 @@ public class GameManager {
         }
 
         int meta = board.getTamanho();
+        int winnerId = -1;
 
-        //Vitoria normal
+        // normal
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
-                board.setCurrentPlayerID(p.getId()); // colocar o currentplayerid no vencedor
-                return true;
+                winnerId = Math.max(winnerId, p.getId());
             }
         }
 
-        //Empate: ninguém consegue jogar
-        return nenhumJogadorPodeJogar();
+        if(winnerId != -1){
+            board.setCurrentPlayerID(winnerId);
+            return true;
+        }
 
+        // empate
+        return nenhumJogadorPodeJogar();
     }
+
 
 
 
