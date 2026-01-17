@@ -518,7 +518,7 @@ public class GameManager {
         }
 
         // atualizar histórico antes de alterar a posição
-        jogadorAtual.atualizarHistorico();
+        //jogadorAtual.atualizarHistorico();
 
         int tamanho = board.getTamanho();
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
@@ -663,7 +663,7 @@ public class GameManager {
                 case 20: // LLM
                     boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
                     //aTÉ À 3ª RONDA (turnos < 3)
-                    if (board.getTurnos() <= 3) {
+                    if (board.getTurnos() < 4) {
                         if (temAjuda) {
                             jogador.usarFerramenta("Ajuda Do Professor");
                             board.setTurnos(board.getTurnos() + 1);
@@ -676,7 +676,7 @@ public class GameManager {
                     }
                     //A PARTIR DA 4ª RONDA (turnos >= 3)
                     int avancar = board.getUltimoValorDado();
-                    int novaPosLLM = jogador.getPosicaoAnterior() + avancar;
+                    int novaPosLLM = jogador.getPosicao() + avancar;
                     if (novaPosLLM > board.getTamanho()) {
                         int excesso = novaPosLLM - board.getTamanho();
                         novaPosLLM = board.getTamanho() - excesso;

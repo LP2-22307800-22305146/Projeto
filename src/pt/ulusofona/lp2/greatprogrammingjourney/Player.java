@@ -17,6 +17,15 @@ public class Player {
 
     private boolean preso = false;
     private boolean derrotado = false;
+    private int jogadas = 0;
+
+    public void incrementJogadas() {
+        jogadas++;
+    }
+
+    public int getJogadas() {
+        return jogadas;
+    }
 
     public Player(int id, String nome, String cor) {
         this.id = id;
