@@ -665,7 +665,7 @@ public class GameManager {
                     boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
 
                     //aTÉ À 3ª RONDA (turnos < 3)
-                    if (board.getTurnos() < 3) {
+                    if (board.getTurnos() < 4) {
 
                         if (temAjuda) {
                             jogador.usarFerramenta("Ajuda Do Professor");
