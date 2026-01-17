@@ -535,6 +535,7 @@ public class GameManager {
 
         // se o jogador chegou ao fim, o jogo termina
         if (novaPosicao == tamanho) {
+            board.setCurrentPlayerID(idAtual); // passar o vencedor para o "current player"
             return true;
         }
 
@@ -715,12 +716,14 @@ public class GameManager {
         //Vitoria normal
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
+                board.setCurrentPlayerID(p.getId()); // colocar o currentplayerid no vencedor
                 return true;
             }
         }
 
         //Empate: ninguém consegue jogar
         return nenhumJogadorPodeJogar();
+
     }
 
 
