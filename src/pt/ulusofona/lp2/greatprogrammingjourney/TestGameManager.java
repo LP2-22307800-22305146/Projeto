@@ -1215,8 +1215,34 @@ public class TestGameManager {
     }
 
      */
+    @Test
+    void testLLM_UntilThirdRound_Recuar() {
+        GameManager gm = new GameManager();
 
+        String[][] players = {
+                {"1", "Ana", "C#", "Blue"},
+                {"2", "Raquelita", "C#", "Green"}
+        };
+
+        String[][] abismos = {
+                {"0", "20", "6"} // LLM na casa 6
+        };
+
+        assertTrue(gm.createInitialBoard(players, 20, abismos));
+
+        // Jogada 1 → Raquelita vai para 6
+        assertTrue(gm.moveCurrentPlayer(5));
+        gm.reactToAbyssOrTool();
+
+        // Deve recuar para a posição anterior (1)
+        String info = gm.getProgrammerInfoAsStr(2);
+        assertTrue(info.contains("| 1 |"));
+
+        // Turnos = 1
+        assertEquals(1, gm.getBoard().getTurnos());
+    }
 
 }
+
 
 

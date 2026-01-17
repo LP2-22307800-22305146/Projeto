@@ -661,47 +661,35 @@ public class GameManager {
                         break;
                     }
                 case 20: // LLM
-
                     boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
-
                     //aTÉ À 3ª RONDA (turnos < 3)
-                    if (board.getTurnos() < 4) {
-
+                    if (board.getTurnos() <= 3) {
                         if (temAjuda) {
                             jogador.usarFerramenta("Ajuda Do Professor");
                             board.setTurnos(board.getTurnos() + 1);
                             return jogador.getNome() + " evitou o abismo LLM com Ajuda do Professor!";
                         }
-
                         int posAnterior = jogador.getPosicaoAnterior();
                         jogador.setPosicao(posAnterior);
                         board.setTurnos(board.getTurnos() + 1);
-
                         return jogador.getNome() + " recuou devido ao abismo LLM!";
                     }
-
                     //A PARTIR DA 4ª RONDA (turnos >= 3)
                     int avancar = board.getUltimoValorDado();
-                    int novaPosLLM = jogador.getPosicao() + avancar;
-
+                    int novaPosLLM = jogador.getPosicaoAnterior() + avancar;
                     if (novaPosLLM > board.getTamanho()) {
                         int excesso = novaPosLLM - board.getTamanho();
                         novaPosLLM = board.getTamanho() - excesso;
                     }
-
                     jogador.setPosicao(novaPosLLM);
                     board.setTurnos(board.getTurnos() + 1);
-
                     return jogador.getNome() + " beneficiou do LLM e avançou " + avancar + " casas!";
-
             }
-
             jogador.setPosicao(novaPos);
             board.setTurnos(board.getTurnos() + 1);
             return jogador.getNome() + " caiu no abismo " + a.getNome() + " e foi parar à casa " + novaPos + "!";
         }
-
-        // casa vazia
+        //casa vazia
         board.setTurnos(board.getTurnos() + 1);
         return null;
     }
