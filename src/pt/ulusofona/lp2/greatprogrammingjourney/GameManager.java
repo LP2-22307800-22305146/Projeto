@@ -518,7 +518,7 @@ public class GameManager {
         }
 
         // atualizar histórico antes de alterar a posição
-        //jogadorAtual.atualizarHistorico();
+        jogadorAtual.atualizarHistorico();
 
         int tamanho = board.getTamanho();
         int novaPosicao = jogadorAtual.getPosicao() + nrSpaces;
@@ -543,6 +543,8 @@ public class GameManager {
         idsOrdenados.sort(Integer::compareTo);
         int proximo = idsOrdenados.get((idsOrdenados.indexOf(idAtual) + 1) % idsOrdenados.size());
         board.setCurrentPlayerID(proximo);
+        jogadorAtual.incrementJogadas();
+
 
         return true;
     }
@@ -663,7 +665,7 @@ public class GameManager {
                 case 20: // LLM
                     boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
                     //aTÉ À 3ª RONDA (turnos < 3)
-                    if (board.getTurnos() < 4) {
+                    if (jogador.getJogadas() < 4){
                         if (temAjuda) {
                             jogador.usarFerramenta("Ajuda Do Professor");
                             board.setTurnos(board.getTurnos() + 1);
