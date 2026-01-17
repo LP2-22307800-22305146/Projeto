@@ -637,17 +637,16 @@ public class GameManager {
                     novaPos = jogador.getPosicaoHaDoisTurnos();
                     break;
 
-                case 7: // Blue Screen of Death
-                    // perde o jogo
+                case 7: // Blue Screen
                     jogador.setDerrotado(true);
                     board.setTurnos(board.getTurnos() + 1);
-                    return jogador.getNome() + " sofreu uma Blue Screen of Death e foi derrotado!";
+                    return jogador.getNome() + " sofreu uma Blue Screen of Death!";
 
                 case 8: // Ciclo Infinito
-                    // jogador fica preso
                     jogador.setPreso(true);
                     board.setTurnos(board.getTurnos() + 1);
-                    return jogador.getNome() + " ficou preso num ciclo infinito!";
+                    return jogador.getNome() + " ficou preso num Ciclo Infinito!";
+
 
                 case 9: // Segmentation Fault
                     // se houver 2+ jogadores na mesma casa, todos recuam 3 casas
@@ -697,26 +696,35 @@ public class GameManager {
         board.setTurnos(board.getTurnos() + 1);
         return null;
     }
+    private boolean nenhumJogadorPodeJogar() {
+        for (Player p : board.getJogadores().values()) {
+            if (!p.isDerrotado() && !p.isPreso()) {
+                return false; // há pelo menos um jogador ativo
+            }
+        }
+        return true; // todos estão presos ou derrotados
+    }
 
     public boolean gameIsOver() {
-        //se o tabuleiro não tem jogadores, o jogo não pode ter terminado
         if (board.getJogadores().isEmpty()) {
             return false;
         }
 
+        int meta = board.getTamanho();
 
-        int meta = board.getTamanho(); //ultima posição do tabuleiro
-
-        //percorre todos os jogadores e verifica se alguém chegou à meta
+        //Vitoria normal
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
-                return true; //o jogo termina imediatamente
+                return true;
             }
         }
 
-        //ninguém chegou ainda
-        return false;
+        //Empate: ninguém consegue jogar
+        return nenhumJogadorPodeJogar();
     }
+
+
+
 
     public ArrayList<String> getGameResults() {
         ArrayList<String> resultados = new ArrayList<>();
@@ -740,6 +748,18 @@ public class GameManager {
         }
         resultados.add(String.valueOf(turnos));
         resultados.add(""); // linha vazia
+
+        if (nenhumJogadorPodeJogar()) {
+            resultados.add("O jogo terminou empatado.");
+            resultados.add("");
+            resultados.add("Participantes:");
+
+            for (Player p : board.getJogadores().values()) {
+                resultados.add(p.getNome() + " " + p.getPosicao());
+            }
+
+            return resultados;
+        }
 
         //vencedor
         resultados.add("VENCEDOR");
