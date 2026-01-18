@@ -491,8 +491,10 @@ public class GameManager {
         if (jogadorAtual.isPreso()) {
             jogadorAtual.setPreso(false);
             board.setTurnos(board.getTurnos() + 1);
-            avancarTurno();
-            return true;
+            if (!gameIsOver()) {
+                avancarTurno();
+            }
+            return false;
         }
 
         // Restrição de Linguagem
@@ -747,7 +749,27 @@ public class GameManager {
             return true;
         }
 
-        return nenhumJogadorPodeJogar();
+        if (nenhumJogadorPodeJogar()) {
+
+            int bestPos = -1;
+            int bestId = -1;
+
+            for (Player p : board.getJogadores().values()) {
+                if (p.getPosicao() > bestPos) {
+                    bestPos = p.getPosicao();
+                    bestId = p.getId();
+                } else if (p.getPosicao() == bestPos) {
+                    if (bestId == -1 || p.getId() < bestId) {
+                        bestId = p.getId();
+                    }
+                }
+            }
+
+            board.setCurrentPlayerID(bestId);
+            return true;
+        }
+
+        return false;
     }
 
 
