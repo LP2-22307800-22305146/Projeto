@@ -172,23 +172,37 @@ public class Player {
     }
 
     public void usarFerramentaContra(Abismo a) {
+        if (a == null) {
+            return;
+        }
+
         int ferramentaParaRemover = -1;
 
         switch (a.getId()) {
-            case 0 -> ferramentaParaRemover = 4; // Erro de Sintaxe ← IDE
-            case 1 -> ferramentaParaRemover = 2; // Erro de Lógica ← Testes Unitários
-            case 2 -> ferramentaParaRemover = 3; // Exception ← Tratamento de Exceções
-            case 3 -> ferramentaParaRemover = 5; // FileNotFoundException ← Ajuda do Professor
-            case 4 -> ferramentaParaRemover = 5; // Crash ← Ajuda do Professor
-            case 5 -> ferramentaParaRemover = 0; // Código Duplicado ← Herança
-            case 6 -> ferramentaParaRemover = 1; // Efeitos Secundários ← Programação Funcional
-            case 8 -> ferramentaParaRemover = 5; // Ciclo Infinito ← Ajuda do Professor
-            case 20 -> ferramentaParaRemover = 5; // LLM ← Ajuda do Professor
+            case 0 -> ferramentaParaRemover = 4; // IDE
+            case 1 -> ferramentaParaRemover = 2; // Testes Unitários
+            case 2 -> ferramentaParaRemover = 3; // Tratamento de Excepções
 
+            case 3 -> { // FileNotFoundException -> pode ser Tratamento(3) OU Ajuda(5)
+                boolean temTratamento = ferramentas.stream().anyMatch(f -> f.getId() == 3);
+                if (temTratamento) {
+                    ferramentaParaRemover = 3;
+                } else {
+                    ferramentaParaRemover = 5;
+                }
+            }
+
+            case 4 -> ferramentaParaRemover = 5; // Ajuda do Professor
+            case 5 -> ferramentaParaRemover = 0; // Herança
+            case 6 -> ferramentaParaRemover = 1; // Programação Funcional
+            case 8 -> ferramentaParaRemover = 5; // Ajuda do Professor
+            case 20 -> ferramentaParaRemover = 5; // Ajuda do Professor
         }
 
-        int finalFerramentaParaRemover = ferramentaParaRemover;
-        ferramentas.removeIf(f -> f.getId() == finalFerramentaParaRemover);
+        int finalId = ferramentaParaRemover;
+        if (finalId != -1) {
+            ferramentas.removeIf(f -> f.getId() == finalId);
+        }
     }
 
     public boolean isPreso() {

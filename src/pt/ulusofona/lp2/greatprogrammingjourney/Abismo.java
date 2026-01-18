@@ -28,7 +28,7 @@ public class Abismo {
     // Nome do abismo conforme o ID
     private String nomeAbismoPorId(int id) {
         switch (id) {
-            case 0: return "Erro de Sintaxe";
+            case 0: return "Erro de sintaxe";
             case 1: return "Erro de Lógica";
             case 2: return "Exception";
             case 3: return "FileNotFoundException";
