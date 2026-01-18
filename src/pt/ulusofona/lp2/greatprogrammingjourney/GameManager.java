@@ -561,7 +561,6 @@ public class GameManager {
                 msg = "Nada aconteceu.";
             } else if (!jogador.temFerramenta(f)) {
                 jogador.adicionarFerramenta(f);
-                board.getFerramentas().remove(posicao);
                 msg = jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
             } else {
                 msg = jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
