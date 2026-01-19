@@ -643,7 +643,7 @@ public class GameManager {
         }
 
         finalizarTurno();
-        return "null";
+        return null;
     }
 
 
