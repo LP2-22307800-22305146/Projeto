@@ -473,7 +473,7 @@ public class GameManager {
 
     public boolean moveCurrentPlayer(int nrSpaces) {
         // valida se o valor do dado é entre 1 e 6
-        if (nrSpaces < 1 || nrSpaces > 100) {
+        if (nrSpaces < 1 || nrSpaces > 6) {
             return false;
         }
 
@@ -585,8 +585,6 @@ public class GameManager {
                 jogador.setPreso(true);
                 return jogador.getNome() + " ficou preso num Ciclo Infinito!";
             }
-
-
 
             case 9 -> {
                 long playersHere = board.getJogadores().values().stream()
