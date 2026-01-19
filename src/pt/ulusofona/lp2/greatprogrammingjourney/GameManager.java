@@ -681,25 +681,31 @@ public class GameManager {
     }
 
     public boolean gameIsOver() {
-        if (board.getJogadores().isEmpty()) {
+        if (board == null) {
+            return false;
+        }
+
+        if (board.getJogadores() == null || board.getJogadores().isEmpty()) {
             return false;
         }
 
         int meta = board.getTamanho();
-        int winnerId = -1;
+        ArrayList<Player> jogadoresOrdenados = new ArrayList<>();
+        jogadoresOrdenados.addAll(board.getJogadores().values());
 
-        // vitoria por chegada à meta
-        for (Player p : board.getJogadores().values()) {
-            if (p.getPosicao() == meta) {
-                if (winnerId == -1 || p.getId() < winnerId) {
-                    winnerId = p.getId();
-                }
+        // ordenar alfabeticamente pelo nome (ignora maiúsculas/minúsculas)
+        jogadoresOrdenados.sort((p1, p2) ->
+                p1.getNome().compareToIgnoreCase(p2.getNome())
+        );
+
+        // verificar se algum chegou à casa final
+        for (int i = 0; i < jogadoresOrdenados.size(); i++) {
+            Player candidato = jogadoresOrdenados.get(i);
+
+            if (candidato.getPosicao() == meta) {
+                board.setCurrentPlayerID(candidato.getId());
+                return true;
             }
-        }
-
-        if (winnerId != -1) {
-            board.setCurrentPlayerID(winnerId);
-            return true;
         }
 
         // ninguem pode jogar → jogo acaba
@@ -709,7 +715,6 @@ public class GameManager {
 
         return false;
     }
-
 
 
     public ArrayList<String> getGameResults() {
