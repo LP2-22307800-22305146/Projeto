@@ -539,18 +539,14 @@ public class GameManager {
         return true;
     }
 
-    //metodo auxiliar
+
     private void finalizarTurno() {
-        boolean terminou = gameIsOver(); // avalia UMA vez
-
         board.setTurnos(board.getTurnos() + 1);
-
-        if (!terminou) {
+        if (!gameIsOver()) {
             avancarTurno();
         }
     }
 
-    //metodo auxiliar
     private String tratarAbismo(Player jogador, Abismo a) {
 
         int aid = a.getId();
@@ -641,14 +637,15 @@ public class GameManager {
 
         if (board.getAbismos().containsKey(posicao)) {
             Abismo a = board.getAbismos().get(posicao);
-            String msg = (a == null) ? "Nada aconteceu." : tratarAbismo(jogador, a);
+            String msg = (a == null) ? "null" : tratarAbismo(jogador, a);
             finalizarTurno();
             return msg;
         }
 
         finalizarTurno();
-        return "Nada aconteceu.";
+        return "null";
     }
+
 
 
     private boolean nenhumJogadorPodeJogar() {
@@ -741,7 +738,9 @@ public class GameManager {
             // ordenar por posição desc; se empatar, por nome asc
             lista.sort((p1, p2) -> {
                 int cmp = Integer.compare(p2.getPosicao(), p1.getPosicao());
-                if (cmp != 0) return cmp;
+                if (cmp != 0) {
+                    return cmp;
+                }
                 return p1.getNome().compareToIgnoreCase(p2.getNome());
             });
 
