@@ -489,10 +489,6 @@ public class GameManager {
         }
 
         if (jogadorAtual.isPreso()) {
-            board.setTurnos(board.getTurnos() + 1);
-            if (!gameIsOver()) {
-                avancarTurno();
-            }
             return false;
         }
 
