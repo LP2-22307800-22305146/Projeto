@@ -537,11 +537,15 @@ public class GameManager {
 
 
     private void finalizarTurno() {
-        board.setTurnos(board.getTurnos() + 1);
-        if (!gameIsOver()) {
-            avancarTurno();
+        // Se o jogo acabou, NAO mexe em nada
+        if (gameIsOver()) {
+            return;
         }
+
+        board.setTurnos(board.getTurnos() + 1);
+        avancarTurno();
     }
+
 
     private String tratarAbismo(Player jogador, Abismo a) {
 
