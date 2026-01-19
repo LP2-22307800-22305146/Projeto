@@ -678,6 +678,7 @@ public class GameManager {
         int meta = board.getTamanho();
         int winnerId = -1;
 
+        // alguem chegou à meta
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
                 if (winnerId == -1 || p.getId() < winnerId) {
@@ -691,12 +692,19 @@ public class GameManager {
             return true;
         }
 
+        // ninguem pode jogar
         if (nenhumJogadorPodeJogar()) {
 
             int bestPos = -1;
             int bestId = -1;
 
             for (Player p : board.getJogadores().values()) {
+
+                //por favor funciona para o teste obg
+                if (p.isDerrotado() || p.isPreso()) {
+                    continue; // IGNORA presos e derrotados
+                }
+
                 if (p.getPosicao() > bestPos) {
                     bestPos = p.getPosicao();
                     bestId = p.getId();
@@ -713,8 +721,6 @@ public class GameManager {
 
         return false;
     }
-
-
 
 
     public ArrayList<String> getGameResults() {
