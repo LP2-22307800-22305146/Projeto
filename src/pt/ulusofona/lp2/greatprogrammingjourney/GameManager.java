@@ -685,35 +685,38 @@ public class GameManager {
             return false;
         }
 
-        if (board.getJogadores() == null || board.getJogadores().isEmpty()) {
+        if(board.getJogadores() == null ) {
             return false;
         }
 
-        int meta = board.getTamanho();
-        ArrayList<Player> jogadoresOrdenados = new ArrayList<>();
-        jogadoresOrdenados.addAll(board.getJogadores().values());
+        if(board.getJogadores().isEmpty()){
+            return false;
+        }
 
-        // ordenar alfabeticamente pelo nome (ignora maiúsculas/minúsculas)
-        jogadoresOrdenados.sort((p1, p2) ->
-                p1.getNome().compareToIgnoreCase(p2.getNome())
-        );
+        int fim = board.getTamanho();
 
-        // verificar se algum chegou à casa final
-        for (int i = 0; i < jogadoresOrdenados.size(); i++) {
-            Player candidato = jogadoresOrdenados.get(i);
+        ArrayList<Player> lista = new ArrayList<>();
+        lista.addAll(board.getJogadores().values());
 
-            if (candidato.getPosicao() == meta) {
-                board.setCurrentPlayerID(candidato.getId());
-                return true;
+        for (int i = 0; i < lista.size() - 1; i++) {
+            for (int j = i + 1; j < lista.size(); j++) {
+                if (lista.get(i).getNome().compareToIgnoreCase(lista.get(j).getNome()) > 0) {
+                    Player p = lista.get(i);
+                    lista.set(i, lista.get(j));
+                    lista.set(j, p);
+                }
             }
         }
 
-        // ninguem pode jogar → jogo acaba
-        if (nenhumJogadorPodeJogar()) {
-            return true;
+        for (int k = 0; k < lista.size(); k++) {
+            Player alvo = lista.get(k);
+            if (alvo.getPosicao() >= fim) {
+                board.setCurrentPlayerID(alvo.getId());
+                return true;
+            }
         }
-
-        return false;
+        
+        return nenhumJogadorPodeJogar();
     }
 
 
