@@ -156,8 +156,8 @@ public class Player {
                         return true;
                     }
                 }
-                case 8 -> { // Ciclo Infinito ← Ajuda do Professor
-                    if (f.getId() == 5) {
+                case 8 -> { // Ciclo Infinito ← Programação Funcional
+                    if (f.getId() == 1) {
                         return true;
                     }
                 }
