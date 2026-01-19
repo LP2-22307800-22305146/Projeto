@@ -611,6 +611,9 @@ public class GameManager {
 
 
     public String reactToAbyssOrTool() {
+        if (gameIsOver()) {
+            return null;
+        }
 
         Player jogador = board.getJogadores().get(board.getCurrentPlayerID());
         if (jogador == null) {

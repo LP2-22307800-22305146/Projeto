@@ -210,11 +210,13 @@ public class Player {
     }
 
     // LINGUAGENS
-    public String primeiraLinguagem () {
-
+    public String primeiraLinguagem() {
+        if (linguagensFavoritas.isEmpty()) {
+            return "";
+        }
         return linguagensFavoritas.get(0);
-
     }
+
 
     //LLM
     public void usarFerramenta(String nome) {
