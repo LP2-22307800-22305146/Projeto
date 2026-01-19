@@ -195,7 +195,7 @@ public class Player {
             case 4 -> ferramentaParaRemover = 5; // Ajuda do Professor
             case 5 -> ferramentaParaRemover = 0; // Herança
             case 6 -> ferramentaParaRemover = 1; // Programação Funcional
-            case 8 -> ferramentaParaRemover = 5; // Ajuda do Professor
+            case 8 -> ferramentaParaRemover = 1; // Ajuda do Professor
             case 20 -> ferramentaParaRemover = 5; // Ajuda do Professor
         }
 

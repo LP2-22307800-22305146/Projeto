@@ -678,13 +678,6 @@ public class GameManager {
     }
 
     public boolean gameIsOver() {
-       /*
-        if (board == null || board.getJogadores().isEmpty()) {
-            return false;
-        }
-
-        */
-
         int meta = board.getTamanho();
 
         //vitoria por chegada à meta
