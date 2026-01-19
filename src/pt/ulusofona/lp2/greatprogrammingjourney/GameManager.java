@@ -489,13 +489,13 @@ public class GameManager {
         }
 
         if (jogadorAtual.isPreso()) {
-            jogadorAtual.setPreso(false);
             board.setTurnos(board.getTurnos() + 1);
             if (!gameIsOver()) {
                 avancarTurno();
             }
             return false;
         }
+
 
         // Restrição de Linguagem
         String primeiraLinguagem = jogadorAtual.primeiraLinguagem();
@@ -611,9 +611,7 @@ public class GameManager {
 
 
     public String reactToAbyssOrTool() {
-        if (gameIsOver()) {
-            return null;
-        }
+
 
         Player jogador = board.getJogadores().get(board.getCurrentPlayerID());
         if (jogador == null) {
@@ -1012,7 +1010,7 @@ public class GameManager {
             Player p = board.getJogadores().get(cand);
 
             // só salta DERROTADOS (presos continuam na rotação)
-            if (p != null && !p.isDerrotado()) {
+            if (p != null && !p.isDerrotado() && !p.isPreso()) {
                 board.setCurrentPlayerID(cand);
                 return;
             }
