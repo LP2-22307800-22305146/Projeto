@@ -18,9 +18,6 @@ public class GameManager {
     }
 
     public boolean createInitialBoard(String[][] playerInfo, int worldSize) {
-        if (gameIsOver()) {
-            return false;
-        }
 
         //Validação inicial do array
         if (playerInfo == null || playerInfo.length < 2 || playerInfo.length > 4) {
@@ -681,9 +678,12 @@ public class GameManager {
     }
 
     public boolean gameIsOver() {
+       /*
         if (board == null || board.getJogadores().isEmpty()) {
             return false;
         }
+
+        */
 
         int meta = board.getTamanho();
 

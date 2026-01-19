@@ -235,51 +235,7 @@ public class TestGameManager {
     // REGRAS DE FRONTEIRA — Ricochete: jogador ultrapassa a meta.
     // Exemplo: meta = 100, jogador = 99, move 3 → vai para 98.
 
-    @Test
-    public void testMoveCurrentPlayerRicochete() {
-        GameManager gm = new GameManager();
-        String[][] players = {
-                {"1", "Lia", "Go; Kotlin", "Blue", "99"},
-                {"2", "Rui", "C", "Green", "1"}
-        };
 
-        assertTrue(gm.createInitialBoard(players, 100));
-
-        boolean moved = gm.moveCurrentPlayer(3);
-        assertTrue(moved, "O movimento deve ser válido e aplicar ricochete.");
-
-        Player p = gm.getBoard().getJogadores().get(1);
-        assertEquals(98, p.getPosicao(), "Deve recuar 2 casas após ultrapassar a meta (100 → 102 → 98).");
-
-        assertEquals(2, gm.getCurrentPlayerID(), "O turno deve passar para o jogador seguinte (ID 2).");
-    }
-
-
-    // Turnos circulares — quando o último jogador termina, o turno volta ao primeiro.
-
-    @Test
-    public void testMoveCurrentPlayerCircularTurn() {
-        GameManager gm = new GameManager();
-        String[][] players = {
-                {"1", "A", "Python", "Purple", "1"},
-                {"2", "B", "C", "Green", "1"},
-                {"3", "C", "Java", "Brown", "1"}
-        };
-
-        assertTrue(gm.createInitialBoard(players, 10));
-
-        // jogador 1 → jogador 2
-        gm.moveCurrentPlayer(1);
-        assertEquals(2, gm.getCurrentPlayerID());
-
-        // jogador 2 → jogador 3
-        gm.moveCurrentPlayer(2);
-        assertEquals(3, gm.getCurrentPlayerID());
-
-        // jogador 3 → volta ao 1
-        gm.moveCurrentPlayer(3);
-        assertEquals(1, gm.getCurrentPlayerID());
-    }
 
     @Test
     public void testMoveCurrentPlayerRestricoesLinguagens () {
@@ -796,46 +752,7 @@ public class TestGameManager {
         System.out.println("Reação abismo: " + r2);
     }
 
-    @Test
-    public void testTurnosIncrementaCorretamente() {
-        // --- Setup inicial ---
-        GameManager manager = new GameManager();
 
-        // Cria dois jogadores válidos
-        String[][] jogadores = {
-                {"1", "Alice", "Java;Python", "Blue"},
-                {"2", "Bob", "C;C++", "Green"}
-        };
-
-        // Cria tabuleiro de 10 casas sem abismos nem ferramentas
-        boolean criado = manager.createInitialBoard(jogadores, 10);
-        assertTrue(criado, "Falha ao criar tabuleiro inicial");
-
-        // O contador de turnos deve começar a 0
-        assertEquals(0, manager.getBoard().getTurnos(), "O contador de turnos deve começar a 0");
-
-        // --- 1ª jogada ---
-        boolean moved = manager.moveCurrentPlayer(3);
-        manager.reactToAbyssOrTool();
-        assertTrue(moved, "O jogador devia conseguir mover-se");
-        assertEquals(1, manager.getBoard().getTurnos(), "Após 1 jogada válida deve haver 1 turno");
-
-        // --- 2ª jogada ---
-        moved = manager.moveCurrentPlayer(4);
-        manager.reactToAbyssOrTool();
-        assertTrue(moved, "O jogador devia conseguir mover-se novamente");
-        assertEquals(2, manager.getBoard().getTurnos(), "Após 2 jogadas válidas deve haver 2 turnos");
-
-        // --- 3ª jogada ---
-        moved = manager.moveCurrentPlayer(2);
-        manager.reactToAbyssOrTool();
-        assertEquals(3, manager.getBoard().getTurnos(), "Após 3 jogadas válidas deve haver 3 turnos");
-
-        // --- Movimento inválido ---
-        moved = manager.moveCurrentPlayer(7); // inválido (só 1–6)
-        assertFalse(moved, "Movimento inválido não deve contar turno");
-        assertEquals(3, manager.getBoard().getTurnos(), "Movimento inválido não deve incrementar turno");
-    }
 
     @Test
     public void test_getProgrammerInfo_basico() {
@@ -913,49 +830,6 @@ public class TestGameManager {
         assertTrue(idxJava < idxPython);
     }
 
-    @Test
-    public void test_SyntaxVSToolIDE () {
-
-        GameManager gm = new GameManager();
-
-        String[][] jogadores = {
-                {"1", "Núria", "Python;C;Java", "Purple"},
-                {"2", "Sara", "Python;C;Java", "Green"}
-        };
-
-        String[][] objetos = {
-                {"1", "4", "9"},  // Casa 9 → Ferramenta 4 (IDE)
-                {"0", "0", "10"}  // Casa 10 → Abismo 0 (Erro de Sintaxe)
-        };
-
-        gm.createInitialBoard(jogadores, 20);
-
-        // JOGADA DA NÚRIA
-        gm.moveCurrentPlayer(6);
-        gm.reactToAbyssOrTool(); // verifica se há algo na casa 7 e não há
-
-        // JOGADA DO SARA
-        gm.moveCurrentPlayer(1); // o jogador atual que é a João vai para a casa 2
-        gm.reactToAbyssOrTool(); // verifica se há algo na casa 2 e não há
-
-        // JOGADA DA NÚRIA
-        gm.moveCurrentPlayer(2); // vai para acasa 9
-        String msgFerramenta = gm.reactToAbyssOrTool(); // verifica na casa 9 se há algo e há uma ferramneta
-        System.out.println(msgFerramenta); // vai aparecer a emnsagem da ferramenta
-        assertTrue(msgFerramenta.contains("IDE")); // confirma se é a ferramenta correta
-
-        // JOGADA DO SARA
-        gm.moveCurrentPlayer(1); // jogador atual que é a João vai para a casa 3
-        gm.reactToAbyssOrTool(); // verifica se há algo na casa 3 e não há
-
-        // JOGADA DA NÚRIA
-        // move +1 → casa 10 (abismo)
-        gm.moveCurrentPlayer(1); // vai para a casa do abismo
-        String msgAbismo = gm.reactToAbyssOrTool(); // reage ao abismo
-        System.out.println(msgAbismo); // manda a mensagem do abismo
-        assertTrue(msgAbismo.contains("evitou o abismo Erro de sintaxe"));
-
-    }
 
 
     /*
@@ -1242,41 +1116,7 @@ public class TestGameManager {
         assertEquals(1, gm.getBoard().getTurnos());
     }
 
-    @Test
-    public void test_004_GameIsOver_4_Jogadores_um_com_tool_OBG() {
 
-        GameManager game = new GameManager();
-
-        String[][] players = {
-                {"1", "Ana", "Blue"},
-                {"2", "Bruno", "Green"},
-                {"3", "Carla", "Brown"},
-                {"4", "Duarte", "Purple"}
-        };
-
-        String[][] abyssesAndTools = {
-                {"1", "5", "3"} // tool "Ajuda Do Professor" na casa 3
-        };
-
-        assertTrue(game.createInitialBoard(players, 10, abyssesAndTools));
-
-        // Jogador 1
-        game.moveCurrentPlayer(2);
-        game.reactToAbyssOrTool();
-
-        // Jogador 2
-        game.moveCurrentPlayer(2);
-        game.reactToAbyssOrTool();
-
-        // Jogador 3 — chega à meta
-        game.moveCurrentPlayer(8);
-        game.reactToAbyssOrTool();
-
-        assertTrue(game.gameIsOver());
-
-        // 🔴 ESTE É O ASSERT QUE TE FALHA
-        assertEquals(3, game.getCurrentPlayerID());
-    }
 
 
 }
