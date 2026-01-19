@@ -473,7 +473,7 @@ public class GameManager {
 
     public boolean moveCurrentPlayer(int nrSpaces) {
         // valida se o valor do dado é entre 1 e 6
-        if (nrSpaces < 1 || nrSpaces > 6) {
+        if (nrSpaces < 1 || nrSpaces > 100) {
             return false;
         }
 
@@ -537,15 +537,11 @@ public class GameManager {
 
 
     private void finalizarTurno() {
-        // Se o jogo acabou, NAO mexe em nada
-        if (gameIsOver()) {
-            return;
-        }
-
         board.setTurnos(board.getTurnos() + 1);
-        avancarTurno();
+        if (!gameIsOver()) {
+            avancarTurno();
+        }
     }
-
 
     private String tratarAbismo(Player jogador, Abismo a) {
 
@@ -593,9 +589,18 @@ public class GameManager {
 
 
             case 9 -> {
-                board.getJogadores().values().stream()
+                long playersHere = board.getJogadores().values().stream()
                         .filter(p -> p.getPosicao() == posicao)
-                        .forEach(p -> p.setPosicao(Math.max(1, p.getPosicao() - 3)));
+                        .count();
+
+                if (playersHere >= 2) {
+                    board.getJogadores()
+                            .values()
+                            .forEach(p -> p.setPosicao(Math.max(1, p.getPosicao() - 3)));
+
+                    return "Falha de segmentação! Todos os jogadores recuaram 3 casas.";
+                }
+
                 return jogador.getNome() + " caiu no abismo " + a.getNome() + "!";
             }
 
