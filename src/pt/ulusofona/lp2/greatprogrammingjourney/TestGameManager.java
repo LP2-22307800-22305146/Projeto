@@ -1242,6 +1242,43 @@ public class TestGameManager {
         assertEquals(1, gm.getBoard().getTurnos());
     }
 
+    @Test
+    public void test_004_GameIsOver_4_Jogadores_um_com_tool_OBG() {
+
+        GameManager game = new GameManager();
+
+        String[][] players = {
+                {"1", "Ana", "Blue"},
+                {"2", "Bruno", "Green"},
+                {"3", "Carla", "Brown"},
+                {"4", "Duarte", "Purple"}
+        };
+
+        String[][] abyssesAndTools = {
+                {"1", "5", "3"} // tool "Ajuda Do Professor" na casa 3
+        };
+
+        assertTrue(game.createInitialBoard(players, 10, abyssesAndTools));
+
+        // Jogador 1
+        game.moveCurrentPlayer(2);
+        game.reactToAbyssOrTool();
+
+        // Jogador 2
+        game.moveCurrentPlayer(2);
+        game.reactToAbyssOrTool();
+
+        // Jogador 3 — chega à meta
+        game.moveCurrentPlayer(8);
+        game.reactToAbyssOrTool();
+
+        assertTrue(game.gameIsOver());
+
+        // 🔴 ESTE É O ASSERT QUE TE FALHA
+        assertEquals(3, game.getCurrentPlayerID());
+    }
+
+
 }
 
 

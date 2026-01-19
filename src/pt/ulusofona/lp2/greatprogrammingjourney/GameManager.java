@@ -539,184 +539,117 @@ public class GameManager {
         return true;
     }
 
+    //metodo auxiliar
+    private void finalizarTurno() {
+        boolean terminou = gameIsOver(); // avalia UMA vez
+
+        board.setTurnos(board.getTurnos() + 1);
+
+        if (!terminou) {
+            avancarTurno();
+        }
+    }
+
+    //metodo auxiliar
+    private String tratarAbismo(Player jogador, Abismo a) {
+
+        int aid = a.getId();
+        int posicao = jogador.getPosicao();
+        int novaPos = posicao;
+
+        if (jogador.temFerramentaQueAnula(a, board.getTurnos())) {
+            jogador.usarFerramentaContra(a);
+            return jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
+        }
+
+        switch (aid) {
+            case 0 -> novaPos = Math.max(1, posicao - 1);
+            case 1 -> novaPos = Math.max(1, posicao - board.getUltimoValorDado() / 2);
+            case 2 -> novaPos = Math.max(1, posicao - 2);
+            case 3 -> novaPos = Math.max(1, posicao - 3);
+            case 4 -> novaPos = 1;
+            case 5 -> novaPos = jogador.getPosicaoAnterior();
+            case 6 -> novaPos = jogador.getPosicaoHaDoisTurnos();
+
+            case 7 -> {
+                jogador.setDerrotado(true);
+                return jogador.getNome() + " sofreu uma Blue Screen of Death!";
+            }
+
+            case 8 -> {
+                jogador.setPreso(true);
+                return jogador.getNome() + " ficou preso num Ciclo Infinito!";
+            }
+
+            case 9 -> {
+                board.getJogadores().values().stream()
+                        .filter(p -> p.getPosicao() == posicao)
+                        .forEach(p -> p.setPosicao(Math.max(1, p.getPosicao() - 3)));
+                return jogador.getNome() + " caiu no abismo " + a.getNome() + "!";
+            }
+
+            case 20 -> {
+                if (jogador.getJogadas() < 4) {
+                    if (jogador.temFerramenta("Ajuda Do Professor")) {
+                        jogador.usarFerramenta("Ajuda Do Professor");
+                        return jogador.getNome() + " evitou o abismo LLM com Ajuda do Professor!";
+                    }
+                    jogador.setPosicao(jogador.getPosicaoAnterior());
+                    return jogador.getNome() + " recuou devido ao abismo LLM!";
+                }
+
+                int avancar = board.getUltimoValorDado();
+                novaPos = jogador.getPosicao() + avancar;
+                if (novaPos > board.getTamanho()) {
+                    novaPos = board.getTamanho() - (novaPos - board.getTamanho());
+                }
+                jogador.setPosicao(novaPos);
+                return jogador.getNome() + " beneficiou do LLM e avançou " + avancar + " casas!";
+            }
+        }
+
+        jogador.setPosicao(novaPos);
+        return jogador.getNome() + " caiu no abismo " + a.getNome()
+                + " e foi parar à casa " + novaPos + "!";
+    }
+
+
     public String reactToAbyssOrTool() {
 
-        int idParaReagir = board.getCurrentPlayerID();
-        Player jogador = board.getJogadores().get(idParaReagir);
-
+        Player jogador = board.getJogadores().get(board.getCurrentPlayerID());
         if (jogador == null) {
-            board.setTurnos(board.getTurnos() + 1);
-            if (!gameIsOver()) {
-                avancarTurno();
-            }
-            return null; // só aqui (situação anormal)
+            finalizarTurno();
+            return null;
         }
 
         int posicao = jogador.getPosicao();
 
-        // ferramenta tem prioridade
         if (board.getFerramentas().containsKey(posicao)) {
             Ferramenta f = board.getFerramentas().get(posicao);
-
             String msg;
-            if (f == null) {
-                msg = "Nada aconteceu.";
-            } else if (!jogador.temFerramenta(f)) {
+
+            if (jogador.temFerramenta(f)) {
+                msg = jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
+            } else {
                 jogador.adicionarFerramenta(f);
                 msg = jogador.getNome() + " encontrou a ferramenta " + f.getNome() + "!";
-            } else {
-                msg = jogador.getNome() + " já tinha a ferramenta " + f.getNome() + ".";
             }
 
-            board.setTurnos(board.getTurnos() + 1);
-            if (!gameIsOver()) {
-                avancarTurno();
-            }
+            finalizarTurno();
             return msg;
         }
 
-        // abismo
         if (board.getAbismos().containsKey(posicao)) {
             Abismo a = board.getAbismos().get(posicao);
-
-            if (a == null) {
-                board.setTurnos(board.getTurnos() + 1);
-                if (!gameIsOver()) {
-                    avancarTurno();
-                }
-                return "Nada aconteceu.";
-            }
-
-            int aid = a.getId();
-
-            if (jogador.temFerramentaQueAnula(a, board.getTurnos())) {
-                jogador.usarFerramentaContra(a);
-                String msg = jogador.getNome() + " evitou o abismo " + a.getNome() + "!";
-                board.setTurnos(board.getTurnos() + 1);
-                if (!gameIsOver()) {
-                    avancarTurno();
-                }
-                return msg;
-            }
-
-            int novaPos = jogador.getPosicao();
-
-            switch (aid) {
-                case 0 -> novaPos = Math.max(1, novaPos - 1);
-                case 1 -> {
-                    int dado = board.getUltimoValorDado();
-                    int n = (int) Math.floor(dado / 2.0);
-                    novaPos = Math.max(1, novaPos - n);
-                }
-                case 2 -> novaPos = Math.max(1, novaPos - 2);
-                case 3 -> novaPos = Math.max(1, novaPos - 3);
-                case 4 -> novaPos = 1;
-                case 5 -> novaPos = jogador.getPosicaoAnterior();
-                case 6 -> novaPos = jogador.getPosicaoHaDoisTurnos();
-
-                case 7 -> {
-                    jogador.setDerrotado(true);
-                    String msg = jogador.getNome() + " sofreu uma Blue Screen of Death!";
-                    board.setTurnos(board.getTurnos() + 1);
-                    if (!gameIsOver()) {
-                        avancarTurno();
-                    }
-                    return msg;
-                }
-
-                case 8 -> {
-                    jogador.setPreso(true);
-                    String msg = jogador.getNome() + " ficou preso num Ciclo Infinito!";
-                    board.setTurnos(board.getTurnos() + 1);
-                    if (!gameIsOver()) {
-                        avancarTurno();
-                    }
-                    return msg;
-                }
-
-                case 9 -> {
-                    long count = board.getJogadores().values().stream()
-                            .filter(p -> p.getPosicao() == posicao)
-                            .count();
-
-                    if (count > 1) {
-                        for (Player p : board.getJogadores().values()) {
-                            if (p.getPosicao() == posicao) {
-                                p.setPosicao(Math.max(1, p.getPosicao() - 3));
-                            }
-                        }
-                    }
-
-                    String msg = jogador.getNome() + " caiu no abismo " + a.getNome() + "!";
-                    board.setTurnos(board.getTurnos() + 1);
-                    if (!gameIsOver()) {
-                        avancarTurno();
-                    }
-                    return msg;
-                }
-
-                case 20 -> {
-                    if (jogador.getJogadas() < 4) {
-                        boolean temAjuda = jogador.temFerramenta("Ajuda Do Professor");
-                        if (temAjuda) {
-                            jogador.usarFerramenta("Ajuda Do Professor");
-                            String msg = jogador.getNome() + " evitou o abismo LLM com Ajuda do Professor!";
-                            board.setTurnos(board.getTurnos() + 1);
-                            if (!gameIsOver()) {
-                                avancarTurno();
-                            }
-                            return msg;
-                        }
-
-                        jogador.setPosicao(jogador.getPosicaoAnterior());
-                        String msg = jogador.getNome() + " recuou devido ao abismo LLM!";
-                        board.setTurnos(board.getTurnos() + 1);
-                        if (!gameIsOver()) {
-                            avancarTurno();
-                        }
-                        return msg;
-                    }
-
-                    int avancar = board.getUltimoValorDado();
-                    int novaPosLLM = jogador.getPosicao() + avancar;
-                    if (novaPosLLM > board.getTamanho()) {
-                        int excesso = novaPosLLM - board.getTamanho();
-                        novaPosLLM = board.getTamanho() - excesso;
-                    }
-
-                    jogador.setPosicao(novaPosLLM);
-                    if (novaPosLLM == board.getTamanho()) {
-                        board.setCurrentPlayerID(jogador.getId());
-                    }
-
-                    String msg = jogador.getNome() + " beneficiou do LLM e avançou " + avancar + " casas!";
-                    board.setTurnos(board.getTurnos() + 1);
-                    if (!gameIsOver()) {
-                        avancarTurno();
-                    }
-                    return msg;
-                }
-            }
-
-            jogador.setPosicao(novaPos);
-
-            String msg = jogador.getNome() + " caiu no abismo " + a.getNome() +
-                    " e foi parar à casa " + novaPos + "!";
-
-            board.setTurnos(board.getTurnos() + 1);
-            if (!gameIsOver()) {
-                avancarTurno();
-            }
+            String msg = (a == null) ? "Nada aconteceu." : tratarAbismo(jogador, a);
+            finalizarTurno();
             return msg;
         }
 
-        // casa vazia -> null (regra dos testes)
-        board.setTurnos(board.getTurnos() + 1);
-        if (!gameIsOver()) {
-            avancarTurno();
-        }
-        return null;
+        finalizarTurno();
+        return "Nada aconteceu.";
     }
+
 
     private boolean nenhumJogadorPodeJogar() {
         for (Player p : board.getJogadores().values()) {
