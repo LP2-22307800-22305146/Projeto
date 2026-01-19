@@ -573,9 +573,24 @@ public class GameManager {
             }
 
             case 8 -> {
+                int pos = jogador.getPosicao();
+
+                // procurar alguém preso na mesma casa
+                for (Player p : board.getJogadores().values()) {
+                    if (p != jogador && p.getPosicao() == pos && p.isPreso()) {
+                        p.setPreso(false);      // liberta o preso antigo
+                        jogador.setPreso(true); // o atual fica preso
+                        return jogador.getNome() + " libertou " + p.getNome()
+                                + " do Ciclo Infinito e ficou preso!";
+                    }
+                }
+
+                // ninguém preso -> fica preso normalmente
                 jogador.setPreso(true);
                 return jogador.getNome() + " ficou preso num Ciclo Infinito!";
             }
+
+
 
             case 9 -> {
                 board.getJogadores().values().stream()
