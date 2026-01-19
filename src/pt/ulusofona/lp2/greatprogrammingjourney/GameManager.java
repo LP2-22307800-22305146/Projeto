@@ -678,11 +678,11 @@ public class GameManager {
         int meta = board.getTamanho();
         int winnerId = -1;
 
-        // alguem chegou à meta
+        // vitoria por chegada à meta
         for (Player p : board.getJogadores().values()) {
             if (p.getPosicao() == meta) {
                 if (winnerId == -1 || p.getId() < winnerId) {
-                    winnerId = p.getId(); // menor ID vence
+                    winnerId = p.getId();
                 }
             }
         }
@@ -692,35 +692,14 @@ public class GameManager {
             return true;
         }
 
-        // ninguem pode jogar
+        // ninguem pode jogar → jogo acaba
         if (nenhumJogadorPodeJogar()) {
-
-            int bestPos = -1;
-            int bestId = -1;
-
-            for (Player p : board.getJogadores().values()) {
-
-                //por favor funciona para o teste obg
-                if (p.isDerrotado() || p.isPreso()) {
-                    continue; // IGNORA presos e derrotados
-                }
-
-                if (p.getPosicao() > bestPos) {
-                    bestPos = p.getPosicao();
-                    bestId = p.getId();
-                } else if (p.getPosicao() == bestPos) {
-                    if (bestId == -1 || p.getId() < bestId) {
-                        bestId = p.getId();
-                    }
-                }
-            }
-
-            board.setCurrentPlayerID(bestId);
             return true;
         }
 
         return false;
     }
+
 
 
     public ArrayList<String> getGameResults() {
