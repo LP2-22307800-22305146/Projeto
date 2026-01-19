@@ -473,7 +473,7 @@ public class GameManager {
 
     public boolean moveCurrentPlayer(int nrSpaces) {
         // valida se o valor do dado é entre 1 e 6
-        if (nrSpaces < 1 || nrSpaces > 100) {
+        if (nrSpaces < 1 || nrSpaces > 6) {
             return false;
         }
 
@@ -571,7 +571,6 @@ public class GameManager {
             case 8 -> {
                 int pos = jogador.getPosicao();
 
-                // 1) libertar todos os jogadores presos na mesma casa (exceto o jogador atual)
                 boolean libertouAlguem = false;
 
                 for (Player p : board.getJogadores().values()) {
@@ -581,10 +580,8 @@ public class GameManager {
                     }
                 }
 
-                // 2) o jogador atual fica preso (sempre)
                 jogador.setPreso(true);
 
-                // 3) mensagem
                 if (libertouAlguem) {
                     return jogador.getNome() + " libertou um jogador do Ciclo Infinito e ficou preso!";
                 }
