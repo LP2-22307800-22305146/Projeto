@@ -681,42 +681,47 @@ public class GameManager {
     }
 
     public boolean gameIsOver() {
-        if (board == null) {
+        if (board == null || board.getJogadores().isEmpty()) {
             return false;
         }
 
-        if(board.getJogadores() == null ) {
-            return false;
-        }
+        int meta = board.getTamanho();
 
-        if(board.getJogadores().isEmpty()){
-            return false;
-        }
-
-        int fim = board.getTamanho();
-
-        ArrayList<Player> lista = new ArrayList<>();
-        lista.addAll(board.getJogadores().values());
-
-        for (int i = 0; i < lista.size() - 1; i++) {
-            for (int j = i + 1; j < lista.size(); j++) {
-                if (lista.get(i).getNome().compareToIgnoreCase(lista.get(j).getNome()) > 0) {
-                    Player p = lista.get(i);
-                    lista.set(i, lista.get(j));
-                    lista.set(j, p);
+        //vitoria por chegada à meta
+        int winnerId = -1;
+        for (Player p : board.getJogadores().values()) {
+            if (p.getPosicao() == meta) {
+                if (winnerId == -1 || p.getId() < winnerId) {
+                    winnerId = p.getId();
                 }
             }
         }
 
-        for (int k = 0; k < lista.size(); k++) {
-            Player alvo = lista.get(k);
-            if (alvo.getPosicao() >= fim) {
-                board.setCurrentPlayerID(alvo.getId());
-                return true;
-            }
+        if (winnerId != -1) {
+            board.setCurrentPlayerID(winnerId);
+            return true;
         }
-        
-        return nenhumJogadorPodeJogar();
+
+        //ninguem m pode jogar
+        if (nenhumJogadorPodeJogar()) {
+
+            int bestPos = -1;
+            int bestId = -1;
+
+            for (Player p : board.getJogadores().values()) {
+                if (p.getPosicao() > bestPos) {
+                    bestPos = p.getPosicao();
+                    bestId = p.getId();
+                } else if (p.getPosicao() == bestPos && p.getId() < bestId) {
+                    bestId = p.getId();
+                }
+            }
+
+            board.setCurrentPlayerID(bestId);
+            return true;
+        }
+
+        return false;
     }
 
 
