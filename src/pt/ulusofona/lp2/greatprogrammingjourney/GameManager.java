@@ -1021,7 +1021,7 @@ public class GameManager {
             Player p = board.getJogadores().get(cand);
 
             // só salta DERROTADOS (presos continuam na rotação)
-            if (p != null && !p.isDerrotado() && !p.isPreso()) {
+            if (p != null && !p.isDerrotado()) {
                 board.setCurrentPlayerID(cand);
                 return;
             }
